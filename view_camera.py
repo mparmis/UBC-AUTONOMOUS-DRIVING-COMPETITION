@@ -17,6 +17,8 @@ class image_converter:
   def __init__(self):
     self.image_sub = rospy.Subscriber("/R1/pi_camera/image_raw",Image,self.callback)
     self.bridge = CvBridge()
+    self.first_plot = True
+    self.plot = None
     #self.ax1 = plt.subplot(1,2,1)
 
 
@@ -27,11 +29,21 @@ class image_converter:
     except CvBridgeError as e:
       print(e)
 
-    ##image processing:
-    imgplot = plt.imshow(cv_image)
-    plt.show()  # display it
+    #matplotlib image show
+    if(self.first_plot):
+        fg = plt.figure()
+        ax = fg.gca()
+        h = ax.imshow(cv_image)
+        self.first_plot = False
+        self.plot = h
+    else:
+        self.plot.set_data(cv_image)
+        plt.draw(), plt.pause(1e-3)
+
+    #cv2 image show
     #cv2.imshow('window', cv_image)
-   
+
+
 
 def main(args):
   ic = image_converter()
@@ -40,7 +52,6 @@ def main(args):
     rospy.spin()
   except KeyboardInterrupt:
     print("Shutting down")
-  plt.close('all')
-
+    plt.close('all')
 if __name__ == '__main__':
     main(sys.argv)
