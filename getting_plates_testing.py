@@ -177,8 +177,8 @@ class image_converter:
         sizeL = p_order[0][1] - p_order[3][1]
         sizeR = p_order[1][1] - p_order[2][1]
 
-        drop_ratio = 1.26
-
+        #drop_ratio = 1.26
+        drop_ratio = 1.4458
         p_adjusted = p_order.copy()
         p_adjusted[3][1] = int(max(p_adjusted[3][1] + ((1-drop_ratio)*sizeL), 0))
         p_adjusted[2][1] = int(max(p_adjusted[2][1] + ((1-drop_ratio)*sizeR), 0))
