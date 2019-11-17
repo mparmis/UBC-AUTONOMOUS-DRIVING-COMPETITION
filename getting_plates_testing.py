@@ -125,7 +125,8 @@ class image_converter:
     mask_edge = cv2.inRange(gray_im, 240, 280)
     mask_road = cv2.inRange(gray_im, 78, 82.5)
 
-####
+
+
     mask_plates_gray =  cv2.inRange(gray_im, 98, 119)
 
     mplate1 = cv2.inRange(cv_image, (99, 99, 99), (103, 103, 103)) #Top left background
@@ -155,7 +156,7 @@ class image_converter:
         area = cv2.contourArea(cnt)
         if area > 500: 
             alength = cv2.arcLength(cnt, True)
-            approx = cv2.approxPolyDP(cnt,  0.0010 * cv2.arcLength(cnt, True), True) #was 0.009
+            approx = cv2.approxPolyDP(cnt,  0.008 * cv2.arcLength(cnt, True), True) #was 0.009
             if len(approx)==4:
                 all_areas.append((area, approx))
                 contour_show = cv2.drawContours(contour_show, [approx], 0, (0, 0, 255), 5) 
@@ -176,7 +177,7 @@ class image_converter:
         sizeL = p_order[0][1] - p_order[3][1]
         sizeR = p_order[1][1] - p_order[2][1]
 
-        drop_ratio = 1.44859813084
+        drop_ratio = 1.26
 
         p_adjusted = p_order.copy()
         p_adjusted[3][1] = int(max(p_adjusted[3][1] + ((1-drop_ratio)*sizeL), 0))
@@ -192,16 +193,20 @@ class image_converter:
         tranformed_image=four_point_transform(cv_image, float_p_adjusted)
     try: 
         plot_image = tranformed_image
+        print("check1")
         self.last_warpped = tranformed_image
+        print("check2")
     except:
         if self.last_warpped is None:
+            print("check3")
             plot_image = cv_image
         else:
+            print("check4")
             plot_image = self.last_warpped
 
 
     print(" ")
-#####
+
     #matplotlib image show
     if(self.first_plot):
         fg = plt.figure()
