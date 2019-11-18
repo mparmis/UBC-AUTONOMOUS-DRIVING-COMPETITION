@@ -36,6 +36,8 @@ class image_converter:
     mask_edge = cv2.inRange(gray_im, 240, 280)
     mask_road = cv2.inRange(gray_im, 78, 82.5)
 
+    mask_crosswalk = cv2.inRange(cv_image, (0, 0, 240), (15, 15, 255))
+
     submask_edge = np.transpose(np.transpose(mask_edge)[600:-1][:])
 
     top = 0
@@ -54,7 +56,7 @@ class image_converter:
   
     circled = cv2.circle(cv_image, (int(x_bar), int((719+500)/2)), 20, (0,255,0), -1)
 
-    plot_image = circled  
+    plot_image = mask_crosswalk  
 
     print(" ")
 
@@ -62,7 +64,7 @@ class image_converter:
     if(self.first_plot):
         fg = plt.figure()
         ax = fg.gca()
-        h = ax.imshow(plot_image)
+        h = ax.imshow(plot_image, cmap='gray')
         self.first_plot = False
         self.plot = h
     else:

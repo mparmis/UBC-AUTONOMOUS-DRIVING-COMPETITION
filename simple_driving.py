@@ -34,7 +34,7 @@ class image_converter:
     self.plot = None
 
     #section int
-    self.section = 1
+    self.section = 3
 
   def callback(self,data):
     
@@ -55,6 +55,8 @@ class image_converter:
     mask_edge = cv2.inRange(gray_im, 240, 280)
     mask_road = cv2.inRange(gray_im, 78, 82.5)
     print('sec: ' + str(self.section))
+
+    mask_crosswalk = cv2.inRange(cv_image, (0, 0, 240), (15, 15, 255))
 
     plot_image = gray_im    
 
@@ -130,6 +132,27 @@ class image_converter:
         else:
           vel.linear.x = 0.0001
           #vel.angular.z = 0.001
+
+        #check for crosswalk:
+        s3_x = 600
+        s3_y = 575
+        s3_dy = 125
+        s3_dx = 200
+        s3_y_low = int(s3_y - (s3_dy/2))
+        s3_y_high = int(s3_y + (s3_dy/2))
+        s3_x_low = int(s3_x - (s3_dx/2))
+        s3_x_high = int(s3_x + (s3_dx/2))
+
+        #val = np.any( np.transpose(mask_edge)[s1_x][s1_y_low:s1_y_high])
+        val = np.any( mask_crosswalk[s3_y_low:s3_y_high, s3_x_low:s3_x_high])
+        print(mask_crosswalk[s3_y_low:s3_y_high, s3_x_low:s3_x_high])
+        print("val" + str(val))
+        if val:
+          print('s3: edge found!')
+          print('ending')
+          self.section = self.section+1
+          vel.angular.z = 0
+          vel.linear.x = 0
 
     else:
       pass
