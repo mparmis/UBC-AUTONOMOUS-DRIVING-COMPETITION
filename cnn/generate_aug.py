@@ -36,7 +36,23 @@ for j, img_path in enumerate(files):
     img_noise = random_noise(img, mode='s&p', amount=0.3)
 
     #add random shift
-    
+    for j, img in enumerate(files):
+        data = img_to_array(load_img(folder_path+img))
+        samples = expand_dims(data, 0)
+        datagen = ImageDataGenerator(width_shift_range=[-20.0,20.0])
+        it = datagen.flow(samples, batch_size=1)
+    # generate samples and plot
+        for i in range(4):
+            # define subplot
+            # pyplot.subplot(330 + 1 + i)
+            # generate batch of images
+            batch = it.next()
+            # convert to unsigned integers for viewing
+            image = batch[0].astype('uint8')
+            image_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP-master/cnn/aug_pics/'+ str(img) + "%d.png" % (i)
+            grayim = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            
+
     #add random shearing
 
     #add radom brightness shift
@@ -45,7 +61,7 @@ for j, img_path in enumerate(files):
 
     #cut images cut
     sub_ims = []
-    
+
     dy_plate = 180
     dx_plate = 120
 
@@ -68,6 +84,6 @@ for j, img_path in enumerate(files):
 
     #splitting ims up:
 
-    
+
     if j % 50 == 0:
         print('on image: ' + str(j))
