@@ -20,7 +20,20 @@ def split_im(im, yi, xi, dy, dx, final_size):
 def get_pics(path_to_pic):
 
     im_rough = cv2.imread(path_to_pic)
+
+    fg = plt.figure()
+    ax = fg.gca()
+    h = ax.imshow(im_rough)
+    plt.draw(), plt.pause(1)
+
     im_raw = cv2.resize(im_rough, (600, 1498)) #<- original training raw im size
+    
+    fg = plt.figure()
+    ax = fg.gca()
+    h = ax.imshow(im_raw)
+    plt.draw(), plt.pause(2)
+
+    
     ims_processed = []
     #filtering for filtered image here:
 
@@ -50,7 +63,7 @@ def get_pics(path_to_pic):
 
 #loading model:
 
-model_path = './cnn/model_saves/model_test'#leav off .[extension]
+model_path = './cnn/model_saves/model_test_SECOND'#leav off .[extension]
 json_file = open(model_path + '.json', 'r')
 loaded_model_json = json_file.read()
 json_file.close()
@@ -63,7 +76,7 @@ print('model_loaded from disk')
 ims, ims_raw = get_pics('/home/jwhite2a/Enph353-JP/cnn/raw_pics/XV84_P451.png')
 ims = np.stack(ims)
 
-index = 1
+index = 0
 y_predict = loaded_model.predict(ims)
 
 print(y_predict[index])

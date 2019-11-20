@@ -97,7 +97,7 @@ conv_model.add(layers.Dense(len(label_options), activation='softmax'))
 conv_model.summary()
 
 LEARNING_RATE = 1e-4
-conv_model.compile(loss='binary_crossentropy',
+conv_model.compile(loss='categorical_crossentropy',
                    optimizer=optimizers.RMSprop(lr=LEARNING_RATE),
                    metrics=['acc'])
 
@@ -105,7 +105,7 @@ reset_weights(conv_model)
 print("--beginning train--")
 history_conv = conv_model.fit(x, y, 
                               validation_split=0.15, 
-                              epochs=5, 
+                              epochs=3, 
                               batch_size=16)
 
 plt.plot(history_conv.history['loss'])
@@ -126,7 +126,7 @@ plt.show()
 
 print('beginning save of model--')
 
-model_save_name = 'model_test'
+model_save_name = 'model_test_SECOND'
 model_json = conv_model.to_json()
 with open("./cnn/model_saves/" + model_save_name+ ".json", "w") as json_file:
     json_file.write(model_json)

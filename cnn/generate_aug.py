@@ -11,17 +11,17 @@ import random
 
 from skimage.util import random_noise
 # load the image
-raw_pics_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/raw_pics/'
-save_pics_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/aug_pics/'
+raw_pics_path = './cnn/raw_pics/'
+save_pics_path = './cnn/aug_pics/'
 # augmented = []
 # augment_names = []
 
 
-files = [img for img in os.listdir(raw_pics_path) if os.path.isfile(os.path.join(raw_pics_path, img))] 
+files = [img for img in os.listdir(raw_pics_path) if os.path.isfile(os.path.join(raw_pics_path, img)) and img.endswith('.png')] 
 #random shuffle
 np.random.shuffle(files)
 #can chan
-MAX_NUM_IMAGES = 40#len(files)
+MAX_NUM_IMAGES = 375#len(files)
 
 for j, img_path in enumerate(files):
 
@@ -36,7 +36,7 @@ for j, img_path in enumerate(files):
     datagen = ImageDataGenerator(width_shift_range=[-20.0,20.0])
     it = datagen.flow(samples, batch_size=1)
     # generate samples and plot
-    for i in range(4):
+    for i in range(2):
         # define subplot
         # pyplot.subplot(330 + 1 + i)
         # generate batch of images
@@ -47,7 +47,7 @@ for j, img_path in enumerate(files):
         datagen = ImageDataGenerator(brightness_range=[0.2,1.3])
         it = datagen.flow(im_shifted, batch_size=1)
         # generate samples and plot
-        for i in range(4):
+        for i in range(2):
             # define subplot
             # pyplot.subplot(330 + 1 + i)
             # generate batch of images
@@ -57,7 +57,7 @@ for j, img_path in enumerate(files):
             it = datagen.flow(im_shifted_brightness, batch_size=1)
 
             # generate samples and plot
-            for i in range(4):
+            for i in range(2):
                 # define subplot
                 # pyplot.subplot(330 + 1 + i)
                 # generate batch of images
@@ -67,7 +67,7 @@ for j, img_path in enumerate(files):
                 it = datagen.flow(im_shifted_rotation, batch_size=1)
 
                 # generate samples and plot
-                for i in range(4):
+                for i in range(2):
                     # define subplot
                     # pyplot.subplot(330 + 1 + i)
                     # generate batch of images
