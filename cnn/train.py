@@ -15,21 +15,19 @@ from matplotlib import pyplot as plt
 from PIL import Image 
 
 import cv2
-from google.colab.patches import cv2_imshow
 
 
 label_options = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-MAX_NUM_IMAGES = 
+
+IM_HEIGHT = 178
+IM_WIDTH = 120
 
 def get_data(folder_path):
     
-    files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
+    files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f)) and f.endswith('.png')]
     np.random.shuffle(files)
 
     MAX_NUM_IMAGES = len(files)
-
-    IM_HEIGHT = 178
-    IM_WIDTH = 120
 
     x = []
     y = []
@@ -47,25 +45,25 @@ def get_data(folder_path):
 
         #preprocessing to convert image to 0-1 scale
         #adding dim 1 to end of image
-        img_processed = np.expand_dims( cv2.resize( (img_raw/255), (IM_WIDTH, IM_HEIGHT)) , axis=2)
+        img_processed = np.expand_dims( cv2.resize( (cv2.cvtColor(img_raw, cv2.COLOR_BGR2GRAY)/255), (IM_WIDTH, IM_HEIGHT)) , axis=2)
        
         if img_processed.shape[0] is not IM_HEIGHT and img_processed.shape[1] is not IM_WIDTH:
             print('error wrong shape:' + str(i))
 
         letter = f[0]
         one_hot = np.zeros(len(label_options))
-        one_hot[label_options.index(letter1)] = 1
+        one_hot[label_options.index(letter)] = 1
         #one_hot_final = np.expand_dims(one_hot, axis=1)
         
         x.append(img_processed)
         y.append(one_hot)
 
     x_return = np.stack(x) 
-    y_return np.stack(y)
+    y_return = np.stack(y)
 
     return x_return, y_return
 
-x, y = get_data_mod('./cnn/aug_pics/')
+x, y = get_data('./cnn/aug_pics/')
 
 print('shape of x data: ' +str(x[1].shape))
 print('shape of y data: ' + str(y[1].shape))
@@ -100,7 +98,7 @@ conv_model.compile(loss='binary_crossentropy',
 
 reset_weights(conv_model)
 print("--beginning train--")
-history_conv = conv_model.fit(xxx, yyy, 
+history_conv = conv_model.fit(x, y, 
                               validation_split=0.15, 
                               epochs=5, 
                               batch_size=16)
@@ -128,6 +126,6 @@ model_json = conv_model.to_json()
 with open("./cnn/model_saves/" + model_save_name+ ".json", "w") as json_file:
     json_file.write(model_json)
 
-model.save_weights('./cnn/model_saves/' + model_save_name + '.h5')
+conv_model.save_weights('./cnn/model_saves/' + model_save_name + '.h5')
 print('--model saved as: ' + model_save_name + "--")
 

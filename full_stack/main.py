@@ -15,7 +15,7 @@ from sklearn.cluster import KMeans
 import time
 
 import driving_functions as drv
-from plate_transform_functions as get_raw_plate
+from plate_transform_functions import get_raw_plate
 
 from std_msgs.msg import String
 class image_converter:
@@ -83,6 +83,7 @@ class image_converter:
     ## cnn
     raw_plate = get_raw_plate(cv_image)
     if raw_plate is not None:
+        print("found plate!")
         pass 
         #do processing here
     
