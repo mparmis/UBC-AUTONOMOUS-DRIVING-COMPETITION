@@ -1,8 +1,6 @@
-#need to add libs
 import cv2
-from keras.models import model_from_json
 import numpy as np
-import matplotlib.pyplot as plt
+
 
 IM_HEIGHT = 178
 IM_WIDTH = 120
@@ -17,10 +15,9 @@ def split_im(im, yi, xi, dy, dx, final_size):
     return ims
 
 
-def get_pics(path_to_pic):
+def convert_pic(raw_pic):
 
-    im_rough = cv2.imread(path_to_pic)
-    im_raw = cv2.resize(im_rough, (600, 1498)) #<- original training raw im size
+    im_raw = cv2.resize(raw_pic, (600, 1498)) #<- original training raw im size
     ims_processed = []
     #filtering for filtered image here:
 
@@ -47,43 +44,3 @@ def get_pics(path_to_pic):
 
     return ims_processed, sub_ims_raw
 
-
-#loading model:
-
-model_path = './cnn/model_saves/model_test'#leav off .[extension]
-json_file = open(model_path + '.json', 'r')
-loaded_model_json = json_file.read()
-json_file.close()
-loaded_model = model_from_json(loaded_model_json)
-loaded_model.load_weights(model_path+ ".h5")
-
-print('model_loaded from disk')
-
-#testing ims:
-ims, ims_raw = get_pics('/home/jwhite2a/Enph353-JP/cnn/raw_pics/XV84_P451.png')
-ims = np.stack(ims)
-
-index = 1
-y_predict = loaded_model.predict(ims)
-
-print(y_predict[index])
-p_i = np.argmax(y_predict[index])
-print('prediction: ' + str(label_options[p_i]))
-print('mag: ' + str(y_predict[index, p_i]))
-
-fg = plt.figure()
-ax = fg.gca()
-h = ax.imshow(ims_raw[index])
-plt.draw(), plt.pause(0.1)
-
-
-img2 = cv2.cvtColor(ims_raw[index], cv2.COLOR_BGR2GRAY)
-
-fg = plt.figure()
-ax = fg.gca()
-h = ax.imshow(img2, cmap='gray')
-plt.draw(), plt.pause(100)
-
-
-
-#print('ans: ' + str(test_ans[index]))

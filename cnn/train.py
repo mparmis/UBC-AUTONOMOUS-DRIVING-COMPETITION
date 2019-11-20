@@ -45,12 +45,17 @@ def get_data(folder_path):
 
         #preprocessing to convert image to 0-1 scale
         #adding dim 1 to end of image
-        img_processed = np.expand_dims( cv2.resize( (cv2.cvtColor(img_raw, cv2.COLOR_BGR2GRAY)/255), (IM_WIDTH, IM_HEIGHT)) , axis=2)
+        im_mid = (cv2.cvtColor(img_raw, cv2.COLOR_BGR2GRAY))
+
+        img_processed = np.expand_dims( cv2.resize( cv2.cvtColor(img_raw, cv2.COLOR_BGR2GRAY), (IM_WIDTH, IM_HEIGHT)), axis=2).astype('float32')/255
        
         if img_processed.shape[0] is not IM_HEIGHT and img_processed.shape[1] is not IM_WIDTH:
-            print('error wrong shape:' + str(i))
+            print('error wrong shape:' + str(j))
 
-        letter = f[0]
+        letter = img_path[0]
+        if j%4 == 0:
+            #print(letter) 
+            print(label_options.index(letter))
         one_hot = np.zeros(len(label_options))
         one_hot[label_options.index(letter)] = 1
         #one_hot_final = np.expand_dims(one_hot, axis=1)
@@ -65,8 +70,8 @@ def get_data(folder_path):
 
 x, y = get_data('./cnn/aug_pics/')
 
-print('shape of x data: ' +str(x[1].shape))
-print('shape of y data: ' + str(y[1].shape))
+print('shape of x data: ' +str(x.shape))
+print('shape of y data: ' + str(y.shape))
 
 def reset_weights(model):
     session = backend.get_session()

@@ -16,8 +16,11 @@ import time
 
 import driving_functions as drv
 from plate_transform_functions import get_raw_plate
+from cnn_utils import convert_pic
 
 from std_msgs.msg import String
+label_options = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+
 class image_converter:
 
   def __init__(self):
@@ -41,8 +44,27 @@ class image_converter:
 
     self.first_plate_publish_flag = 0
 
+
+
+    # model_path = './cnn/model_saves/model_test'#leav off .[extension]
+    # json_file = open(model_path + '.json', 'r')
+    # loaded_model_json = json_file.read()
+    # json_file.close()
+    # self.loaded_model = model_from_json(loaded_model_json)
+    # self.loaded_model.load_weights(model_path+ ".h5")
+
+    # print('model_loaded from disk')
+
+
   def callback(self, data):
     
+    #init vals: too tired to make more elegant
+    team_ID = "Team14"
+    team_password = "h8rdc03d"
+    plate_location = '1' #^from above
+    plate_ID = 'YY66' #from above
+
+
     #timing
     start_time = time.time()
     #print('elapsed_time: ' + str(start_time - self.last_time))
@@ -84,17 +106,25 @@ class image_converter:
     raw_plate = get_raw_plate(cv_image)
     if raw_plate is not None:
         print("found plate!")
-        pass 
+        #pass 
         #do processing here
-    
-        #plate is valid;
-
-
-    team_ID = "Team14"
-    team_password = "h8rdc03d"
-    plate_location = '1' #^from above
-    plate_ID = 'YY66' #from above
-
+        # ims_processed, sub_ims_raw = convert_pic(raw_plate)
+        # ims_for_predict = np.stack(ims_processed)
+        # y_predict = self.loaded_model.predict(ims_for_predict)
+        
+        # y_val = []
+        # y_index = []
+        # all_high_conf_flag = True
+        # for i in range(y_predict.shape[0]):
+        #   p_i = np.argmax(y_predict[i])
+        #   y_val.append(y_predict[i][p_i])
+        #   y_index.append(p_i)
+        #   if (y_predict[i][p_i] < 0.7)
+        #     all_high_conf_flag = False       
+        # if all_high_conf_flag:
+        #   plate_ID = label_options[y_index[0]] + label_options[y_index[1]] + label_options[y_index[2]] + label_options[y_index[3]]
+        #   plate_location = label_options[y_index[4]]
+        
     if(self.first_plate_publish_flag == 0 ):
         publish_string = team_ID + ',' + team_password + ',' + '0' + ',' + 'XX99'
         self.first_plate_publish_flag = 1
