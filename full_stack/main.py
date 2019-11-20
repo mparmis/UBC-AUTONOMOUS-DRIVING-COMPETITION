@@ -15,7 +15,9 @@ from sklearn.cluster import KMeans
 import time
 
 import driving_functions as drv
+from plate_transform_functions as get_raw_plate
 
+from std_msgs.msg import String
 class image_converter:
 
   def __init__(self):
@@ -23,6 +25,8 @@ class image_converter:
     self.bridge = CvBridge()
     self.image_sub = rospy.Subscriber("/R1/pi_camera/image_raw",Image,self.callback)
     
+    self.plate_pub = rospy.Publisher('/license_plate', String, queue_size=10)
+
     self.s3_last_error = 0
     
     #timing
@@ -34,6 +38,8 @@ class image_converter:
 
     #section int
     self.section = 1
+
+    self.first_plate_publish_flag = 0
 
   def callback(self, data):
     
@@ -73,7 +79,30 @@ class image_converter:
     self.vel_pub.publish(vel)
     print('sec: ' + str(self.section))
     print('  ')
+   
     ## cnn
+    raw_plate = get_raw_plate(cv_image)
+    if raw_plate is not None:
+        pass 
+        #do processing here
+    
+        #plate is valid;
+
+
+    team_ID = "Team14"
+    team_password = "h8rdc03d"
+    plate_location = '1' #^from above
+    plate_ID = 'YY66' #from above
+
+    if(self.first_plate_publish_flag == 0 ):
+        publish_string = team_ID + ',' + team_password + ',' + '0' + ',' + 'XX99'
+        self.first_plate_publish_flag = 1
+        self.plate_pub.publish(publish_string)
+    elif(0):
+        publish_string = team_ID + ',' + team_password + ',' + plate_location + ',' + plate_ID
+        self.plate_pub.publish(publish_string)
+
+
 
     
 

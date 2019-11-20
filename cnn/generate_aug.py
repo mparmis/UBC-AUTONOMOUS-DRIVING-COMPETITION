@@ -49,7 +49,7 @@ for j, img_path in enumerate(files):
             batch = it.next()
             # convert to unsigned integers for viewing
             image = batch[0].astype('uint8')
-            image_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP-master/cnn/aug_pics/'+ str(img) + "%d.png" % (i)
+            image_path = './cnn/aug_pics/'+ str(img) + "%d.png" % (i)
             grayim = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             
 
@@ -76,11 +76,7 @@ for j, img_path in enumerate(files):
 
 
     #save all ims
-
-
-
-
-    final_im
+    
 
     #splitting ims up:
 
