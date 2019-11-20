@@ -21,7 +21,7 @@ files = [img for img in os.listdir(raw_pics_path) if os.path.isfile(os.path.join
 #random shuffle
 np.random.shuffle(files)
 #can chan
-MAX_NUM_IMAGES = len(files)
+MAX_NUM_IMAGES = 40#len(files)
 
 for j, img_path in enumerate(files):
 
@@ -69,7 +69,7 @@ for j, img_path in enumerate(files):
             #y_i, x_i, dy, dx all arrays of same size
                 ims = []
                 for i, _ in enumerate(yi):
-                    im_temp = im[ yi[i] : yi[i] + dy[i], xi[i] : xi[i]+dy[i]]
+                    im_temp = im[ yi[i] : yi[i] + dy[i], xi[i] : xi[i]+dx[i]]
                     ims.append(cv2.resize(im_temp, final_size))
                 return ims
                 
@@ -77,7 +77,7 @@ for j, img_path in enumerate(files):
             xi = [40, 140, 340, 445, 330]
             dy = [180, 180, 180, 180, 300]
             dx = [ 120, 120, 120, 120, 240]
-            final_size = (178, 120)
+            final_size = (120, 178)
 
             ims = split_ims(grayim_final, yi, xi, dy, dx, final_size)
 
