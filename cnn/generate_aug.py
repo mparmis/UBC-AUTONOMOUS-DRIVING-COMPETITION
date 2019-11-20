@@ -21,7 +21,10 @@ files = [img for img in os.listdir(raw_pics_path) if os.path.isfile(os.path.join
 #random shuffle
 np.random.shuffle(files)
 #can chan
-MAX_NUM_IMAGES = 375#len(files)
+MAX_NUM_IMAGES = len(files)#len(files)
+
+IM_HEIGHT = 60
+IM_WIDTH = 40
 
 for j, img_path in enumerate(files):
 
@@ -36,7 +39,7 @@ for j, img_path in enumerate(files):
     datagen = ImageDataGenerator(width_shift_range=[-20.0,20.0])
     it = datagen.flow(samples, batch_size=1)
     # generate samples and plot
-    for i in range(2):
+    for i in range(1):
         # define subplot
         # pyplot.subplot(330 + 1 + i)
         # generate batch of images
@@ -47,7 +50,7 @@ for j, img_path in enumerate(files):
         datagen = ImageDataGenerator(brightness_range=[0.2,1.3])
         it = datagen.flow(im_shifted, batch_size=1)
         # generate samples and plot
-        for i in range(2):
+        for i in range(1):
             # define subplot
             # pyplot.subplot(330 + 1 + i)
             # generate batch of images
@@ -57,7 +60,7 @@ for j, img_path in enumerate(files):
             it = datagen.flow(im_shifted_brightness, batch_size=1)
 
             # generate samples and plot
-            for i in range(2):
+            for i in range(1):
                 # define subplot
                 # pyplot.subplot(330 + 1 + i)
                 # generate batch of images
@@ -67,7 +70,7 @@ for j, img_path in enumerate(files):
                 it = datagen.flow(im_shifted_rotation, batch_size=1)
 
                 # generate samples and plot
-                for i in range(2):
+                for i in range(1):
                     # define subplot
                     # pyplot.subplot(330 + 1 + i)
                     # generate batch of images
@@ -84,7 +87,10 @@ for j, img_path in enumerate(files):
                     shift_up = (im_shifted_shear.shape[1], im_shifted_shear.shape[0])
                     im_shifted_shear_resized = cv2.resize(down_sized, shift_up)
                             
-                    grayim_final = cv2.cvtColor(im_shifted_shear_resized, cv2.COLOR_BGR2GRAY)
+                    if j%12 == 0:
+                        grayim_final = cv2.cvtColor(data, cv2.COLOR_BGR2GRAY)
+                    else:
+                        grayim_final = cv2.cvtColor(im_shifted_shear_resized, cv2.COLOR_BGR2GRAY)
 
                     def split_ims(im, yi, xi, dy, dx, final_size):
                     #y_i, x_i, dy, dx all arrays of same size
@@ -98,7 +104,7 @@ for j, img_path in enumerate(files):
                     xi = [40, 140, 340, 445, 330]
                     dy = [180, 180, 180, 180, 300]
                     dx = [ 120, 120, 120, 120, 240]
-                    final_size = (120, 178)
+                    final_size = (IM_WIDTH, IM_HEIGHT)
 
                     ims = split_ims(grayim_final, yi, xi, dy, dx, final_size)
 

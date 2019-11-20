@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 import time
 
+from keras.models import model_from_json
+
 import driving_functions as drv
 from plate_transform_functions import get_raw_plate
 from cnn_utils import convert_pic
@@ -46,14 +48,14 @@ class image_converter:
 
 
 
-    # model_path = './cnn/model_saves/model_test'#leav off .[extension]
-    # json_file = open(model_path + '.json', 'r')
-    # loaded_model_json = json_file.read()
-    # json_file.close()
-    # self.loaded_model = model_from_json(loaded_model_json)
-    # self.loaded_model.load_weights(model_path+ ".h5")
+    model_path = './cnn/model_saves/model_test_4'#leav off .[extension]
+    json_file = open(model_path + '.json', 'r')
+    loaded_model_json = json_file.read()
+    json_file.close()
+    self.loaded_model = model_from_json(loaded_model_json)
+    self.loaded_model.load_weights(model_path+ ".h5")
 
-    # print('model_loaded from disk')
+    print('model_loaded from disk')
 
 
   def callback(self, data):
@@ -108,23 +110,25 @@ class image_converter:
         print("found plate!")
         #pass 
         #do processing here
-        # ims_processed, sub_ims_raw = convert_pic(raw_plate)
-        # ims_for_predict = np.stack(ims_processed)
-        # y_predict = self.loaded_model.predict(ims_for_predict)
+        ims_processed, sub_ims_raw = convert_pic(raw_plate)
+        ims_for_predict = np.stack(ims_processed)
+        print("SHAPE: " + str(ims_for_predict.shape))
+        y_predict = self.loaded_model.predict(ims_for_predict)
         
-        # y_val = []
-        # y_index = []
-        # all_high_conf_flag = True
-        # for i in range(y_predict.shape[0]):
-        #   p_i = np.argmax(y_predict[i])
-        #   y_val.append(y_predict[i][p_i])
-        #   y_index.append(p_i)
-        #   if (y_predict[i][p_i] < 0.7)
-        #     all_high_conf_flag = False       
-        # if all_high_conf_flag:
-        #   plate_ID = label_options[y_index[0]] + label_options[y_index[1]] + label_options[y_index[2]] + label_options[y_index[3]]
-        #   plate_location = label_options[y_index[4]]
-        
+        y_val = []
+        y_index = []
+        all_high_conf_flag = True
+        for i in range(y_predict.shape[0]):
+          p_i = np.argmax(y_predict[i])
+          y_val.append(y_predict[i][p_i])
+          y_index.append(p_i)
+          if (y_predict[i][p_i] < 0.7):
+            all_high_conf_flag = False       
+        if all_high_conf_flag:
+          plate_ID = label_options[y_index[0]] + label_options[y_index[1]] + label_options[y_index[2]] + label_options[y_index[3]]
+          plate_location = label_options[y_index[4]]
+        print("plate: " + str(y_index))
+        print("yvals: " + str(y_vals))
     if(self.first_plate_publish_flag == 0 ):
         publish_string = team_ID + ',' + team_password + ',' + '0' + ',' + 'XX99'
         self.first_plate_publish_flag = 1

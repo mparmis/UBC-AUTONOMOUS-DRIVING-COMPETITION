@@ -112,7 +112,7 @@ def section3_driving(cv_image, last_error):
 
     #val = np.any( np.transpose(mask_edge)[s1_x][s1_y_low:s1_y_high])
     val = np.any( mask_crosswalk[s3_y_low:s3_y_high, s3_x_low:s3_x_high])
-    print(mask_crosswalk[s3_y_low:s3_y_high, s3_x_low:s3_x_high])
+    #print(mask_crosswalk[s3_y_low:s3_y_high, s3_x_low:s3_x_high])
     print("val" + str(val))
     if val:
         print('s3: edge found!')

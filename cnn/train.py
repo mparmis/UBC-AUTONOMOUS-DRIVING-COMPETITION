@@ -19,8 +19,8 @@ import cv2
 
 label_options = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
-IM_HEIGHT = 178
-IM_WIDTH = 120
+IM_HEIGHT = 60
+IM_WIDTH = 40
 
 def get_data(folder_path):
     
@@ -88,7 +88,7 @@ conv_model.add(layers.MaxPooling2D((2, 2)))
 conv_model.add(layers.Conv2D(128, (3, 3), activation='relu'))
 conv_model.add(layers.MaxPooling2D((2, 2)))
 conv_model.add(layers.Conv2D(128, (3, 3), activation='relu'))
-conv_model.add(layers.MaxPooling2D((2, 2)))
+conv_model.add(layers.MaxPooling2D((1, 1)))#was 2, 2
 conv_model.add(layers.Flatten())
 conv_model.add(layers.Dropout(0.5))
 conv_model.add(layers.Dense(512, activation='relu'))
@@ -105,7 +105,7 @@ reset_weights(conv_model)
 print("--beginning train--")
 history_conv = conv_model.fit(x, y, 
                               validation_split=0.15, 
-                              epochs=3, 
+                              epochs=10, 
                               batch_size=16)
 
 plt.plot(history_conv.history['loss'])
@@ -126,7 +126,7 @@ plt.show()
 
 print('beginning save of model--')
 
-model_save_name = 'model_test_SECOND'
+model_save_name = 'model_test_5'
 model_json = conv_model.to_json()
 with open("./cnn/model_saves/" + model_save_name+ ".json", "w") as json_file:
     json_file.write(model_json)

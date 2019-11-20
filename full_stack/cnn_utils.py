@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 
 
-IM_HEIGHT = 178
-IM_WIDTH = 120
+IM_HEIGHT = 69
+IM_WIDTH = 40
 label_options = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 def split_im(im, yi, xi, dy, dx, final_size):
@@ -34,7 +34,7 @@ def convert_pic(raw_pic):
     dy = [180, 180, 180, 180, 300]
     dx = [ 120, 120, 120, 120, 240]
 
-    final_size = (120, 178)
+    final_size = (IM_WIDTH, IM_HEIGHT)
     
     sub_ims = split_im(im_raw, yi, xi, dy, dx, final_size)
     sub_ims_raw = split_im(im_raw, yi, xi, dy, dx, final_size)
