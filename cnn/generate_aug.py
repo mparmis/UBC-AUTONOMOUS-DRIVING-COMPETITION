@@ -11,8 +11,8 @@ import random
 
 from skimage.util import random_noise
 # load the image
-raw_pics_path = 'cnn/raw_pics/'
-save_pics_path = 'cnn/aug_pics/'
+raw_pics_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/raw_pics/'
+save_pics_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/aug_pics/'
 # augmented = []
 # augment_names = []
 
@@ -40,51 +40,73 @@ for j, img_path in enumerate(files):
         # define subplot
         # pyplot.subplot(330 + 1 + i)
         # generate batch of images
-        im_shifted = it.next()#[0].a0].astype('uint8')stype('uint8')
+        im_shifted = it.next()
         
         #brightness change
 
-        datagen = ImageDataGenerator(brightness_range=[0.3,1.4])
+        datagen = ImageDataGenerator(brightness_range=[0.2,1.3])
         it = datagen.flow(im_shifted, batch_size=1)
         # generate samples and plot
         for i in range(4):
             # define subplot
             # pyplot.subplot(330 + 1 + i)
             # generate batch of images
-            im_shifted_brightness = it.next()[0].astype('uint8')
-            # convert to unsigned integers for viewing
-            rand_down_per = random.uniform(0.05, 0.8)
+            im_shifted_brightness = it.next()
 
-            width = int(im_shifted_brightness.shape[1])
-            height = int(im_shifted_brightness.shape[0])
-            shift_down = (int(width*rand_down_per), int(height*rand_down_per))
-            down_sized = cv2.resize(im_shifted_brightness, shift_down)
-            
-            shift_up = (im_shifted_brightness.shape[1], im_shifted_brightness.shape[0])
-            im_shifted_brightness_resized = cv2.resize(down_sized, shift_up)
-                    
-            grayim_final = cv2.cvtColor(im_shifted_brightness_resized, cv2.COLOR_BGR2GRAY)
-    
-            def split_ims(im, yi, xi, dy, dx, final_size):
-            #y_i, x_i, dy, dx all arrays of same size
-                ims = []
-                for i, _ in enumerate(yi):
-                    im_temp = im[ yi[i] : yi[i] + dy[i], xi[i] : xi[i]+dx[i]]
-                    ims.append(cv2.resize(im_temp, final_size))
-                return ims
-                
-            yi = [1320, 1320, 1320, 1320, 740]
-            xi = [40, 140, 340, 445, 330]
-            dy = [180, 180, 180, 180, 300]
-            dx = [ 120, 120, 120, 120, 240]
-            final_size = (120, 178)
+            datagen = ImageDataGenerator(rotation_range=random.uniform(0.5, 3))
+            it = datagen.flow(im_shifted_brightness, batch_size=1)
 
-            ims = split_ims(grayim_final, yi, xi, dy, dx, final_size)
+            # generate samples and plot
+            for i in range(4):
+                # define subplot
+                # pyplot.subplot(330 + 1 + i)
+                # generate batch of images
+                im_shifted_rotation = it.next()
+           
+                datagen = ImageDataGenerator(shear_range=random.uniform(0.5, 5))
+                it = datagen.flow(im_shifted_rotation, batch_size=1)
 
-            for i, im in enumerate(ims):
-                if i <= 3: 
-                    letter = img_path[i]
-                else:
-                    letter = img_path[6]
-                filename = letter + "_" + str(j) + ".png"
-                cv2.imwrite(save_pics_path + filename, ims[i])
+                # generate samples and plot
+                for i in range(4):
+                    # define subplot
+                    # pyplot.subplot(330 + 1 + i)
+                    # generate batch of images
+                    im_shifted_shear = it.next()[0].astype('uint8')
+
+
+                    rand_down_per = random.uniform(0.05, 0.5)
+
+                    width = int(im_shifted_shear.shape[1])
+                    height = int(im_shifted_shear.shape[0])
+                    shift_down = (int(width*rand_down_per), int(height*rand_down_per))
+                    down_sized = cv2.resize(im_shifted_shear, shift_down)
+
+                    shift_up = (im_shifted_shear.shape[1], im_shifted_shear.shape[0])
+                    im_shifted_shear_resized = cv2.resize(down_sized, shift_up)
+                            
+                    grayim_final = cv2.cvtColor(im_shifted_shear_resized, cv2.COLOR_BGR2GRAY)
+
+                    def split_ims(im, yi, xi, dy, dx, final_size):
+                    #y_i, x_i, dy, dx all arrays of same size
+                        ims = []
+                        for i, _ in enumerate(yi):
+                            im_temp = im[ yi[i] : yi[i] + dy[i], xi[i] : xi[i]+dx[i]]
+                            ims.append(cv2.resize(im_temp, final_size))
+                        return ims
+                        
+                    yi = [1320, 1320, 1320, 1320, 740]
+                    xi = [40, 140, 340, 445, 330]
+                    dy = [180, 180, 180, 180, 300]
+                    dx = [ 120, 120, 120, 120, 240]
+                    final_size = (120, 178)
+
+                    ims = split_ims(grayim_final, yi, xi, dy, dx, final_size)
+
+                    for i, im in enumerate(ims):
+                        rand=random.uniform(0,1000)
+                        if i <= 3: 
+                            letter = img_path[i]
+                        else:
+                            letter = img_path[6]
+                        filename = letter + "_" + str(j) + "_%d.png" %(rand)
+                        cv2.imwrite(save_pics_path + filename, ims[i])
