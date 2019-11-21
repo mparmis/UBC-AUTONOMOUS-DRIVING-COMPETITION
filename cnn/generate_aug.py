@@ -12,7 +12,7 @@ import random
 from skimage.util import random_noise
 # load the image
 raw_pics_path = './cnn/raw_pics/'
-save_pics_path = './cnn/aug_pics/'
+save_pics_path = './cnn/aug_pics_test /'
 # augmented = []
 # augment_names = []
 
@@ -28,7 +28,8 @@ IM_WIDTH = 40
 
 for j, img_path in enumerate(files):
 
-    if j == MAX_NUM_IMAGES:
+    #if j == MAX_NUM_IMAGES:
+    if j == 10:
         break
     if j % 5 == 0:
         print('on image: ' + str(j))

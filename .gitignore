@@ -1,3 +1,4 @@
 cnn/aug_pics/*.png
 cnn/raw_pics/*.png
 cnn/model_saves/*
+cnn/aug_pics_test/*.png

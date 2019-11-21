@@ -31,6 +31,7 @@ def get_data(folder_path):
 
     x = []
     y = []
+    x_raw = []
 
 
     for j, img_path in enumerate(files):
@@ -42,6 +43,7 @@ def get_data(folder_path):
             print('on image: ' + str(j))
 
         img_raw = cv2.imread(folder_path + img_path)
+        x_raw.append(img_raw)
 
         #preprocessing to convert image to 0-1 scale
         #adding dim 1 to end of image
@@ -66,9 +68,9 @@ def get_data(folder_path):
     x_return = np.stack(x) 
     y_return = np.stack(y)
 
-    return x_return, y_return
+    return x_return, y_return, x_raw
 
-x, y = get_data('./cnn/aug_pics/')
+x, y, _ = get_data('./cnn/aug_pics/')
 
 print('shape of x data: ' +str(x.shape))
 print('shape of y data: ' + str(y.shape))
@@ -133,4 +135,32 @@ with open("./cnn/model_saves/" + model_save_name+ ".json", "w") as json_file:
 
 conv_model.save_weights('./cnn/model_saves/' + model_save_name + '.h5')
 print('--model saved as: ' + model_save_name + "--")
+
+
+##INFER:
+x_infer, y_infer, y_raw = get_data('cnn/aug_pics_test')
+
+y_predict = conv_model.predict(x_infer)
+
+
+index = 1
+
+print(y_predict[index])
+p_i = np.argmax(y_predict[index])
+print('prediction: ' + str(label_options[p_i]))
+print('mag: ' + str(y_predict[index, p_i]))
+
+#print('ans: ' + str(y_infer[index]))
+fg = plt.figure()
+ax = fg.gca()
+h = ax.imshow(y_raw[index])
+plt.draw(), plt.pause(0.1)
+
+
+img2 = cv2.cvtColor(y_raw[index], cv2.COLOR_BGR2GRAY)
+
+fg = plt.figure()
+ax = fg.gca()
+h = ax.imshow(img2, cmap='gray')
+plt.draw(), plt.pause(100)
 

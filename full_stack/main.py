@@ -13,6 +13,8 @@ from geometry_msgs.msg import Twist
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 import time
+import tensorflow as tf
+from tensorflow.python.keras.backend import set_session
 
 from keras.models import model_from_json
 
@@ -46,17 +48,20 @@ class image_converter:
 
     self.first_plate_publish_flag = 0
 
+    self.sess = tf.Session()
+    self.graph = tf.get_default_graph()
+    set_session(self.sess)
 
-
-    model_path = './cnn/model_saves/model_test_4'#leav off .[extension]
+    model_path = './cnn/model_saves/model_test_5'#leav off .[extension]
     json_file = open(model_path + '.json', 'r')
     loaded_model_json = json_file.read()
     json_file.close()
     self.loaded_model = model_from_json(loaded_model_json)
     self.loaded_model.load_weights(model_path+ ".h5")
-
+    self.loaded_model._make_predict_function()
+    
     print('model_loaded from disk')
-
+    
 
   def callback(self, data):
     
@@ -101,19 +106,21 @@ class image_converter:
     self.section = self.section + flag
 
     self.vel_pub.publish(vel)
-    print('sec: ' + str(self.section))
-    print('  ')
-   
+    #print('sec: ' + str(self.section))
+
     ## cnn
+    all_high_conf_flag = False
     raw_plate = get_raw_plate(cv_image)
     if raw_plate is not None:
         print("found plate!")
         #pass 
         #do processing here
         ims_processed, sub_ims_raw = convert_pic(raw_plate)
-        ims_for_predict = np.stack(ims_processed)
-        print("SHAPE: " + str(ims_for_predict.shape))
-        y_predict = self.loaded_model.predict(ims_for_predict)
+        
+        #print("SHAPE: " + str(ims_processed.shape))
+        with self.graph.as_default():
+          set_session(self.sess)
+          y_predict = self.loaded_model.predict(ims_processed)
         
         y_val = []
         y_index = []
@@ -124,21 +131,23 @@ class image_converter:
           y_index.append(p_i)
           if (y_predict[i][p_i] < 0.7):
             all_high_conf_flag = False       
+        plate_ID = label_options[y_index[0]] + label_options[y_index[1]] + label_options[y_index[2]] + label_options[y_index[3]]
+        plate_location = label_options[y_index[4]]  
         if all_high_conf_flag:
-          plate_ID = label_options[y_index[0]] + label_options[y_index[1]] + label_options[y_index[2]] + label_options[y_index[3]]
-          plate_location = label_options[y_index[4]]
-        print("plate: " + str(y_index))
-        print("yvals: " + str(y_vals))
+          print("FOUND GOOD PLATE")
+
+        print("plate: " + str(plate_ID))
+        print("pos: "+ str(plate_location))
+        print("yvals: " + str(y_val))
     if(self.first_plate_publish_flag == 0 ):
         publish_string = team_ID + ',' + team_password + ',' + '0' + ',' + 'XX99'
         self.first_plate_publish_flag = 1
         self.plate_pub.publish(publish_string)
-    elif(0):
+    elif(all_high_conf_flag):
         publish_string = team_ID + ',' + team_password + ',' + plate_location + ',' + plate_ID
         self.plate_pub.publish(publish_string)
-
-
-
+        print('published plate and stall!')
+    print('  ')
     
 
     ##image processing reference:
