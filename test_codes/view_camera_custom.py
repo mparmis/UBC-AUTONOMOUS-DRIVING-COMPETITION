@@ -38,7 +38,7 @@ class image_converter:
     
     mask_pants = cv2.inRange(cv_image, (50, 40, 25), (90, 70, 43))
 
-    plot_image = cv_image[400:700, 300:800] 
+    plot_image =mask_pants # cv_image[400:700, 300:800] 
 
     #print(mask_pants)
 

@@ -46,7 +46,7 @@ class image_converter:
     self.plot = None
 
     #section int
-    self.section = 3
+    self.section = 1
 
     self.first_plate_publish_flag = 0
 
@@ -66,8 +66,12 @@ class image_converter:
     
     print('model_loaded from disk')
     
+    self.save_i = 0
     self.save_im_path = './full_stack/pics/'
-    os.remove(file) for file in os.listdir(self.save_im_path) if file.endswith('.png')
+    
+    filelist = [ f for f in os.listdir( self.save_im_path) if f.endswith(".png") ]
+    for f in filelist:
+      os.remove(os.path.join(self.save_im_path, f))
     print('files cleared')
 
   def callback(self, data):
@@ -107,7 +111,6 @@ class image_converter:
         vel_lin, vel_ang, flag, gogogo_flag = drv.section4_driving(cv_image, self.gogogo)
         self.gogogo = gogogo_flag
         print("gogoflag: " + str(gogogo_flag))
-
     else:
         pass
 
@@ -124,6 +127,11 @@ class image_converter:
     all_high_conf_flag = False
     raw_plate = get_raw_plate(cv_image)
     if raw_plate is not None:
+        try:
+          cv2.imwrite(self.save_im_path + str(self.save_i) + '.png', raw_plate)
+          self.save_i = self.save_i + 1
+        except:
+          print("failed to save plate")
         print("found plate!")
         #pass 
         #do processing here
