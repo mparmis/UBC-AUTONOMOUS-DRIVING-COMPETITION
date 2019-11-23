@@ -56,16 +56,28 @@ class image_converter:
     self.graph = tf.get_default_graph()
     set_session(self.sess)
 
-    model_path = './cnn/model_saves/model_test_5'#leav off .[extension]
-    json_file = open(model_path + '.json', 'r')
-    loaded_model_json = json_file.read()
+    #number model
+    num_model_path = './cnn/model_saves_num/model_test_5'#leav off .[extension]
+    json_file = open(num_model_path + '.json', 'r')
+    num_loaded_model_json = json_file.read()
     json_file.close()
-    self.loaded_model = model_from_json(loaded_model_json)
-    self.loaded_model.load_weights(model_path+ ".h5")
-    self.loaded_model._make_predict_function()
+    self.num_loaded_model = model_from_json(num_loaded_model_json)
+    self.num_loaded_model.load_weights(num_model_path+ ".h5")
+    self.num_loaded_model._make_predict_function()
+    print('numbers model_loaded from disk')
     
-    print('model_loaded from disk')
+    #letters model
+    letter_model_path = './cnn/model_saves/model_test_5'#leav off .[extension]
+    json_file = open(letter_model_path + '.json', 'r')
+    letter_loaded_model_json = json_file.read()
+    json_file.close()
+    self.letter_loaded_model = model_from_json(letter_loaded_model_json)
+    self.letter_loaded_model.load_weights(letter_model_path+ ".h5")
+    self.letter_loaded_model._make_predict_function()
+    print('letters model_loaded from disk')
     
+
+
     self.save_i = 0
     self.save_im_path = './full_stack/pics/'
     
@@ -138,35 +150,56 @@ class image_converter:
         ims_processed, sub_ims_raw = convert_pic(raw_plate)
         
         #print("SHAPE: " + str(ims_processed.shape))
+        #numbers
         with self.graph.as_default():
           set_session(self.sess)
-          y_predict = self.loaded_model.predict(ims_processed)
+          y_predict_nums = self.num_loaded_model.predict(ims_processed)
         
+        #letters
+        with self.graph.as_default():
+          set_session(self.sess)
+          y_predict_letters = self.letter_loaded_model.predict(ims_processed)
+
         y_val = []
         y_index = []
         all_high_conf_flag = True
-        for i in range(y_predict.shape[0]):
-          p_i = np.argmax(y_predict[i])
-          y_val.append(y_predict[i][p_i])
-          y_index.append(p_i)
-          if (y_predict[i][p_i] < 0.7):
+        plate_string = ""
+
+        for i in range(y_predict_letters.shape[0]):
+          if i <= 1 :
+            p_i = np.argmax(y_predict_letters[i])
+            y_val.append(y_predict_letters[i][p_i])
+            y_index.append(p_i)
+            plate_string = plate_string + label_options[p_i]
+
+          else: 
+            p_i = np.argmax(y_predict_nums[i])
+            y_val.append(y_predict_nums[i][p_i])
+            y_index.append(p_i)
+            plate_string = plate_string + label_options[p_i]
+
+        for val in y_val:
+          if (val < 0.99):
             all_high_conf_flag = False       
-        plate_ID = label_options[y_index[0]] + label_options[y_index[1]] + label_options[y_index[2]] + label_options[y_index[3]]
-        plate_location = label_options[y_index[4]]  
+        
+        #plate_ID = label_options[y_index[0]] + label_options[y_index[1]] + label_options[y_index[2]] + label_options[y_index[3]]
+        #plate_location = label_options[y_index[4]]  
         if all_high_conf_flag:
           print("FOUND GOOD PLATE")
 
-        print("plate: " + str(plate_ID))
-        print("pos: "+ str(plate_location))
+        print("plate: " + str(plate_string))
+        #print("pos: "+ str(plate_location))
         print("yvals: " + str(y_val))
     if(self.first_plate_publish_flag == 0 ):
         publish_string = team_ID + ',' + team_password + ',' + '0' + ',' + 'XX99'
         self.first_plate_publish_flag = 1
         self.plate_pub.publish(publish_string)
     elif(all_high_conf_flag):
+        plate_location = plate_string[4]
+        plate_ID = plate_string[0:3]
         publish_string = team_ID + ',' + team_password + ',' + plate_location + ',' + plate_ID
         self.plate_pub.publish(publish_string)
-        print('published plate and stall!')
+        print('published plate and stall!: ' + str(publish_string))
     print('  ')
     
 

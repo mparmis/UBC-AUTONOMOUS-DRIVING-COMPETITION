@@ -85,11 +85,11 @@ def section3_driving(cv_image, last_error):
         top += np.sum(np.multiply(submask_edge[r], index_array))
         bot += np.sum(submask_edge[r])
     x_bar = top  / (bot +1)
-    print('xbar: ' + str(x_bar))
+    #print('xbar: ' + str(x_bar))
 
     tar = 1100
     error = tar -  x_bar
-    print('error: ' + str(error))
+    #print('error: ' + str(error))
     ang_vel = s3_kp*(error) - s3_kd*(last_error- error)
     new_last_error = error
 
