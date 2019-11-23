@@ -39,10 +39,10 @@ def get_data_infer_full(folder_path):
 
         img_raw = cv2.resize(cv2.imread(folder_path + img_path), (600, 1498))
             #for images from gazebo
-        yi = [1105, 1105, 1105, 1105, 590]
-        xi = [40, 140, 340, 445, 330]
-        dy = [180, 180, 180, 180, 300]
-        dx = [ 120, 120, 120, 120, 240]
+        yi = [1105, 1105] #1105, 1105, 590]
+        xi = [40, 140] #340, 445, 330]
+        dy = [180, 180] #180, 180, 300]
+        dx = [ 120, 120] #120, 120, 240]
 
         # yi = [1320, 1320, 1320, 1320, 740]
         # xi = [40, 140, 340, 445, 330]
@@ -91,10 +91,10 @@ def get_data_infer_single(image_data):
         
     img_raw = cv2.resize(image_data, (600, 1498))
         #for images from gazebo
-    yi = [1105, 1105, 1105, 1105, 590]
-    xi = [40, 140, 340, 445, 330]
-    dy = [180, 180, 180, 180, 300]
-    dx = [ 120, 120, 120, 120, 240]
+    yi = [1105, 1105] #1105, 1105, 590]
+    xi = [40, 140] #340, 445, 330]
+    dy = [180, 180] #180, 180, 300]
+    dx = [ 120, 120] #120, 120, 240]
 
     # yi = [1320, 1320, 1320, 1320, 740]
     # xi = [40, 140, 340, 445, 330]
@@ -112,7 +112,6 @@ def get_data_infer_single(image_data):
 
         #preprocessing to convert image to 0-1 scale
         #adding dim 1 to end of image
-        im_mid = (cv2.cvtColor(img_raw, cv2.COLOR_BGR2GRAY))
 
         img_processed = np.expand_dims( cv2.resize( cv2.cvtColor(img_raw, cv2.COLOR_BGR2GRAY), (IM_WIDTH, IM_HEIGHT)), axis=2).astype('float32')/255
     
@@ -139,10 +138,10 @@ def get_pics(path_to_pic):
     #splitting into sections
 
     #for images from gazebo
-    yi = [1105, 1105, 1105, 1105, 590]
-    xi = [40, 140, 340, 445, 330]
-    dy = [180, 180, 180, 180, 300]
-    dx = [ 120, 120, 120, 120, 240]
+    yi = [1105, 1105] #1105, 1105, 590]
+    xi = [40, 140] #340, 445, 330]
+    dy = [180, 180] #180, 180, 300]
+    dx = [ 120, 120] #120, 120, 240]
 
     # yi = [1320, 1320, 1320, 1320, 740]
     # xi = [40, 140, 340, 445, 330]
@@ -162,7 +161,7 @@ def get_pics(path_to_pic):
 
 #loading model:
 
-model_path = './cnn/model_saves/model_test_5'#leav off .[extension]
+model_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/model_saves/model_test_5'#leav off .[extension]
 json_file = open(model_path + '.json', 'r')
 loaded_model_json = json_file.read()
 json_file.close()
@@ -175,7 +174,7 @@ print('model_loaded from disk')
 #ims, ims_raw = get_pics('/home/jwhite2a/Enph353-JP/cnn/raw_pics/AF36_P241.png')
 
 #x_infer, y_infer, y_raw = get_data_infer_full('/home/jwhite2a/Desktop/testing_imgs/')
-raw_start_im = cv2.imread('/home/jwhite2a/Desktop/testing_imgs/0.42735987143.png')
+raw_start_im = cv2.imread('/media/fizzer/ESD-USB/enph353/pics/88.png')
 x_infer, y_raw = get_data_infer_single(raw_start_im)
 
 y_predict = loaded_model.predict(x_infer)

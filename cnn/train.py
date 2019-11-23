@@ -47,7 +47,6 @@ def get_data(folder_path):
 
         #preprocessing to convert image to 0-1 scale
         #adding dim 1 to end of image
-        im_mid = (cv2.cvtColor(img_raw, cv2.COLOR_BGR2GRAY))
 
         img_processed = np.expand_dims( cv2.resize( cv2.cvtColor(img_raw, cv2.COLOR_BGR2GRAY), (IM_WIDTH, IM_HEIGHT)), axis=2).astype('float32')/255
        
@@ -70,7 +69,7 @@ def get_data(folder_path):
 
     return x_return, y_return, x_raw
 
-x, y, _ = get_data('./cnn/aug_pics/')
+x, y, _ = get_data('/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/aug_letters/')
 
 print('shape of x data: ' +str(x.shape))
 print('shape of y data: ' + str(y.shape))
@@ -107,7 +106,7 @@ reset_weights(conv_model)
 print("--beginning train--")
 history_conv = conv_model.fit(x, y, 
                               validation_split=0.15, 
-                              epochs=10, 
+                              epochs=156, 
                               batch_size=16)
 
 plt.plot(history_conv.history['loss'])
@@ -130,15 +129,15 @@ print('beginning save of model--')
 
 model_save_name = 'model_test_5'
 model_json = conv_model.to_json()
-with open("./cnn/model_saves/" + model_save_name+ ".json", "w") as json_file:
+with open("/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/model_saves/" + model_save_name+ ".json", "w") as json_file:
     json_file.write(model_json)
 
-conv_model.save_weights('./cnn/model_saves/' + model_save_name + '.h5')
+conv_model.save_weights('/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/model_saves/' + model_save_name + '.h5')
 print('--model saved as: ' + model_save_name + "--")
 
 
 ##INFER:
-x_infer, y_infer, y_raw = get_data('cnn/aug_pics_test')
+x_infer, y_infer, y_raw = get_data('/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/aug_pics_test')
 
 y_predict = conv_model.predict(x_infer)
 

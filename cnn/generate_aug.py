@@ -11,8 +11,8 @@ import random
 
 from skimage.util import random_noise
 # load the image
-raw_pics_path = './cnn/raw_pics/'
-save_pics_path = './cnn/aug_pics_test /'
+raw_pics_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/raw_pics/'
+save_pics_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/aug_pics/'
 # augmented = []
 # augment_names = []
 
@@ -25,6 +25,9 @@ MAX_NUM_IMAGES = len(files)#len(files)
 
 IM_HEIGHT = 60
 IM_WIDTH = 40
+
+def blur(img):
+    return (cv2.blur(img,(int(random.uniform(10,40)),int(random.uniform(10,40)))))
 
 for j, img_path in enumerate(files):
 
@@ -48,10 +51,10 @@ for j, img_path in enumerate(files):
         
         #brightness change
 
-        datagen = ImageDataGenerator(brightness_range=[0.2,1.3])
+        datagen = ImageDataGenerator(brightness_range=[0.2,1.3], preprocessing_function= blur,zoom_range=0.08,height_shift_range=[-5,5])
         it = datagen.flow(im_shifted, batch_size=1)
         # generate samples and plot
-        for i in range(1):
+        for i in range(5):
             # define subplot
             # pyplot.subplot(330 + 1 + i)
             # generate batch of images
@@ -87,11 +90,14 @@ for j, img_path in enumerate(files):
 
                     shift_up = (im_shifted_shear.shape[1], im_shifted_shear.shape[0])
                     im_shifted_shear_resized = cv2.resize(down_sized, shift_up)
+                    #cv2.imwrite(save_pics_path+img_path,im_shifted_shear_resized)
                             
                     if j%12 == 0:
                         grayim_final = cv2.cvtColor(data, cv2.COLOR_BGR2GRAY)
+                        cv2.imwrite(save_pics_path+img_path,grayim_final)
                     else:
                         grayim_final = cv2.cvtColor(im_shifted_shear_resized, cv2.COLOR_BGR2GRAY)
+                        #cv2.imwrite(save_pics_path+img_path,grayim_final)
 
                     def split_ims(im, yi, xi, dy, dx, final_size):
                     #y_i, x_i, dy, dx all arrays of same size
