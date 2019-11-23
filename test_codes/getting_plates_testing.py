@@ -231,8 +231,8 @@ class image_converter:
     except KeyBoardInterrupt:
         from random import random
         #save image
-        path = '/home/jwhite2a/Desktop/testing_imgs/'
-        cv2.imwrite(path + str(random())+ ".png" ,self.last_warpped)
+        path = '/home/jwhite2a/Desktop/testing_imgs2/'
+        #cv2.imwrite(path + str(random())+ ".png" ,self.last_warpped)
         raise
 
 

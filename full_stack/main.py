@@ -22,6 +22,8 @@ import driving_functions as drv
 from plate_transform_functions import get_raw_plate
 from cnn_utils import convert_pic
 
+import os
+
 from std_msgs.msg import String
 label_options = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
@@ -44,9 +46,11 @@ class image_converter:
     self.plot = None
 
     #section int
-    self.section = 1
+    self.section = 3
 
     self.first_plate_publish_flag = 0
+
+    self.gogogo = False
 
     self.sess = tf.Session()
     self.graph = tf.get_default_graph()
@@ -62,6 +66,9 @@ class image_converter:
     
     print('model_loaded from disk')
     
+    self.save_im_path = './full_stack/pics/'
+    os.remove(file) for file in os.listdir(self.save_im_path) if file.endswith('.png')
+    print('files cleared')
 
   def callback(self, data):
     
@@ -96,6 +103,11 @@ class image_converter:
     elif(self.section is 3):
         vel_lin, vel_ang, flag, _, new_last_error = drv.section3_driving(cv_image, self.s3_last_error)
         self.s3_last_error = new_last_error
+    elif(self.section is 4):
+        vel_lin, vel_ang, flag, gogogo_flag = drv.section4_driving(cv_image, self.gogogo)
+        self.gogogo = gogogo_flag
+        print("gogoflag: " + str(gogogo_flag))
+
     else:
         pass
 
@@ -106,7 +118,7 @@ class image_converter:
     self.section = self.section + flag
 
     self.vel_pub.publish(vel)
-    #print('sec: ' + str(self.section))
+    print('sec: ' + str(self.section))
 
     ## cnn
     all_high_conf_flag = False
