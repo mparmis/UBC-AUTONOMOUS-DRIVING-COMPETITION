@@ -32,7 +32,7 @@ def blur(img):
 for j, img_path in enumerate(files):
 
     #if j == MAX_NUM_IMAGES:
-    if j == 10:
+    if j == 1:
         break
     if j % 5 == 0:
         print('on image: ' + str(j))

@@ -102,8 +102,8 @@ def section3_driving(cv_image, last_error):
 
     #check for crosswalk:
     s3_x = 600
-    s3_y = 575
-    s3_dy = 125
+    s3_y = 600
+    s3_dy = 20
     s3_dx = 200
     s3_y_low = int(s3_y - (s3_dy/2))
     s3_y_high = int(s3_y + (s3_dy/2))
@@ -123,3 +123,45 @@ def section3_driving(cv_image, last_error):
     
     return vel_lin, vel_ang, flag, plot_image, new_last_error
 
+def section4_driving(cv_image, gogogo_flag):
+
+    vel_lin = 0
+    vel_ang = 0
+    flag = 0
+
+    mask_pants = cv2.inRange(cv_image, (50, 40, 25), (90, 70, 43))
+    total  = np.sum(mask_pants[400:700, 300:800])/255 
+    print(total)
+    if total < 50 or gogogo_flag:
+        gogogo_flag = True
+        vel_lin = 1
+
+    mask_crosswalk = cv2.inRange(cv_image, (0, 0, 240), (15, 15, 255))
+    
+    #check for pedestrian
+    s4_x = 600
+    s4_y = 540
+    s4_dy = 10
+    s4_dx = 200
+    s4_y_low = int(s4_y - (s4_dy/2))
+    s4_y_high = int(s4_y + (s4_dy/2))
+    s4_x_low = int(s4_x - (s4_dx/2))
+    s4_x_high = int(s4_x + (s4_dx/2))
+
+    #val = np.any( np.transpose(mask_edge)[s1_x][s1_y_low:s1_y_high])
+    val = np.any( mask_crosswalk[s4_y_low:s4_y_high, s4_x_low:s4_x_high])
+    #print(mask_crosswalk[s3_y_low:s3_y_high, s3_x_low:s3_x_high])
+    print("val" + str(val))
+    if val:
+        print('s4: edge found!')
+        print('ending')
+        flag = -3 #back to 1
+        vel_lin = 0
+        vel_ang = 0
+        gogogo_flag =  False
+    
+    
+
+
+
+    return vel_lin, vel_ang, flag, gogogo_flag

@@ -29,34 +29,21 @@ class image_converter:
     except CvBridgeError as e:
       print(e)
 
-
-
     gray_im = np.dot(cv_image[...,:3], [0.299, 0.5487, 0.114])
    
     mask_edge = cv2.inRange(gray_im, 240, 280)
     mask_road = cv2.inRange(gray_im, 78, 82.5)
 
     mask_crosswalk = cv2.inRange(cv_image, (0, 0, 240), (15, 15, 255))
+    
+    mask_pants = cv2.inRange(cv_image, (50, 40, 25), (90, 70, 43))
 
-    submask_edge = np.transpose(np.transpose(mask_edge)[600:-1][:])
+    plot_image = cv_image[400:700, 300:800] 
 
-    top = 0
-    bot = 0
-    index_array = np.linspace(600, 600+submask_edge.shape[1]-1, submask_edge.shape[1] )
-    #print('indexarray: ' + str(index_array))
-    for r in range(550, 719): #range of rows to check
-      top += np.sum(np.multiply(submask_edge[r], index_array))
-      bot += np.sum(submask_edge[r])
-    x_bar = top  / (bot +1)
-    print('xbar: ' + str(x_bar))
+    #print(mask_pants)
 
-    tar = 1100
-    error = x_bar - tar
-    print('error: ' + str(error)) 
-  
-    circled = cv2.circle(cv_image, (int(x_bar), int((719+500)/2)), 20, (0,255,0), -1)
-
-    plot_image = mask_crosswalk  
+    total_pants = np.sum(mask_pants[400:700, 300:800])/255 #if greater than 200 move
+    print(total_pants)
 
     print(" ")
 
