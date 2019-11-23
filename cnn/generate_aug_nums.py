@@ -12,7 +12,7 @@ import random
 from skimage.util import random_noise
 # load the image
 raw_pics_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/raw_pics/'
-save_pics_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/aug_pics/'
+save_pics_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/aug_nums/'
 # augmented = []
 # augment_names = []
 
@@ -27,20 +27,18 @@ IM_HEIGHT = 60
 IM_WIDTH = 40
 
 def blur(img):
-    return (cv2.blur(img,(int(random.uniform(10,40)),int(random.uniform(10,40)))))
+    return (cv2.blur(img,(int(random.uniform(10,50)),int(random.uniform(10,50)))))
 
 for j, img_path in enumerate(files):
 
     #if j == MAX_NUM_IMAGES:
-    if j == 1:
-        break
     if j % 5 == 0:
         print('on image: ' + str(j))
 
     #add random shift
     data = img_to_array(load_img(raw_pics_path+img_path))
     samples = expand_dims(data, 0)
-    datagen = ImageDataGenerator(width_shift_range=[-20.0,20.0])
+    datagen = ImageDataGenerator(width_shift_range=[-10.0,10.0])
     it = datagen.flow(samples, batch_size=1)
     # generate samples and plot
     for i in range(1):
@@ -94,10 +92,9 @@ for j, img_path in enumerate(files):
                             
                     if j%12 == 0:
                         grayim_final = cv2.cvtColor(data, cv2.COLOR_BGR2GRAY)
-                        cv2.imwrite(save_pics_path+img_path,grayim_final)
                     else:
                         grayim_final = cv2.cvtColor(im_shifted_shear_resized, cv2.COLOR_BGR2GRAY)
-                        #cv2.imwrite(save_pics_path+img_path,grayim_final)
+                    #cv2.imwrite(save_pics_path+img_path,grayim_final)
 
                     def split_ims(im, yi, xi, dy, dx, final_size):
                     #y_i, x_i, dy, dx all arrays of same size
@@ -107,18 +104,18 @@ for j, img_path in enumerate(files):
                             ims.append(cv2.resize(im_temp, final_size))
                         return ims
                         
-                    yi = [1320, 1320, 1320, 1320, 740]
-                    xi = [40, 140, 340, 445, 330]
-                    dy = [180, 180, 180, 180, 300]
-                    dx = [ 120, 120, 120, 120, 240]
+                    yi = [1320, 1320, 740]
+                    xi = [340, 445, 330]
+                    dy = [180, 180, 300]
+                    dx = [120, 120, 240]
                     final_size = (IM_WIDTH, IM_HEIGHT)
 
                     ims = split_ims(grayim_final, yi, xi, dy, dx, final_size)
 
                     for i, im in enumerate(ims):
                         rand=random.uniform(0,1000)
-                        if i <= 3: 
-                            letter = img_path[i]
+                        if i <= 1: 
+                            letter = img_path[i+2]
                         else:
                             letter = img_path[6]
                         filename = letter + "_" + str(j) + "_%d.png" %(rand)

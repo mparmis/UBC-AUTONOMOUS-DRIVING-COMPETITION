@@ -12,7 +12,7 @@ import random
 from skimage.util import random_noise
 # load the image
 raw_pics_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/raw_pics/'
-save_pics_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/aug_pics/'
+save_pics_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/aug_letters/'
 # augmented = []
 # augment_names = []
 
@@ -27,23 +27,23 @@ IM_HEIGHT = 60
 IM_WIDTH = 40
 
 def blur(img):
-    return (cv2.blur(img,(int(random.uniform(10,40)),int(random.uniform(10,40)))))
+    return (cv2.blur(img,(int(random.uniform(10,60)),int(random.uniform(10,60)))))
 
 for j, img_path in enumerate(files):
 
     #if j == MAX_NUM_IMAGES:
-    if j == 1:
-        break
+    #if j == 10:
+        #break
     if j % 5 == 0:
         print('on image: ' + str(j))
 
     #add random shift
     data = img_to_array(load_img(raw_pics_path+img_path))
     samples = expand_dims(data, 0)
-    datagen = ImageDataGenerator(width_shift_range=[-20.0,20.0])
+    datagen = ImageDataGenerator(width_shift_range=[int(random.uniform(-20.0,-10.0)),int(random.uniform(10.0,20.0))])
     it = datagen.flow(samples, batch_size=1)
     # generate samples and plot
-    for i in range(1):
+    for i in range(int(random.uniform(1,2))):
         # define subplot
         # pyplot.subplot(330 + 1 + i)
         # generate batch of images
@@ -51,7 +51,7 @@ for j, img_path in enumerate(files):
         
         #brightness change
 
-        datagen = ImageDataGenerator(brightness_range=[0.2,1.3], preprocessing_function= blur,zoom_range=0.08,height_shift_range=[-5,5])
+        datagen = ImageDataGenerator(brightness_range=[0.2,1.3], preprocessing_function= blur,zoom_range=0.08,height_shift_range=[int(random.uniform(-10.0,-5.0)),int(random.uniform(5.0,10.0))])
         it = datagen.flow(im_shifted, batch_size=1)
         # generate samples and plot
         for i in range(5):
@@ -64,7 +64,7 @@ for j, img_path in enumerate(files):
             it = datagen.flow(im_shifted_brightness, batch_size=1)
 
             # generate samples and plot
-            for i in range(1):
+            for i in range(int(random.uniform(1,2))):
                 # define subplot
                 # pyplot.subplot(330 + 1 + i)
                 # generate batch of images
@@ -74,7 +74,7 @@ for j, img_path in enumerate(files):
                 it = datagen.flow(im_shifted_rotation, batch_size=1)
 
                 # generate samples and plot
-                for i in range(1):
+                for i in range(int(random.uniform(1,2))):
                     # define subplot
                     # pyplot.subplot(330 + 1 + i)
                     # generate batch of images
@@ -94,10 +94,9 @@ for j, img_path in enumerate(files):
                             
                     if j%12 == 0:
                         grayim_final = cv2.cvtColor(data, cv2.COLOR_BGR2GRAY)
-                        cv2.imwrite(save_pics_path+img_path,grayim_final)
                     else:
                         grayim_final = cv2.cvtColor(im_shifted_shear_resized, cv2.COLOR_BGR2GRAY)
-                        #cv2.imwrite(save_pics_path+img_path,grayim_final)
+                    #cv2.imwrite(save_pics_path+img_path,grayim_final)
 
                     def split_ims(im, yi, xi, dy, dx, final_size):
                     #y_i, x_i, dy, dx all arrays of same size
@@ -107,16 +106,16 @@ for j, img_path in enumerate(files):
                             ims.append(cv2.resize(im_temp, final_size))
                         return ims
                         
-                    yi = [1320, 1320, 1320, 1320, 740]
-                    xi = [40, 140, 340, 445, 330]
-                    dy = [180, 180, 180, 180, 300]
-                    dx = [ 120, 120, 120, 120, 240]
+                    yi = [1320, 1320]
+                    xi = [40, 140]
+                    dy = [180, 180]
+                    dx = [ 120, 120]
                     final_size = (IM_WIDTH, IM_HEIGHT)
 
                     ims = split_ims(grayim_final, yi, xi, dy, dx, final_size)
 
                     for i, im in enumerate(ims):
-                        rand=random.uniform(0,1000)
+                        rand=random.uniform(0,10000)
                         if i <= 3: 
                             letter = img_path[i]
                         else:

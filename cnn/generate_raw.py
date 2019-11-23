@@ -9,7 +9,7 @@ import string
 from random import randint
 from PIL import Image, ImageFont, ImageDraw
 
-path = './cnn/' #from above
+path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/' #from above
 
 #save dir
 save_dir = path + 'raw_pics/'
