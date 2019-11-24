@@ -1,6 +1,14 @@
 import cv2
 import numpy as np
 
+class myBox:
+    def __init__(self, x, y, dx, dy):
+        self.x = int(x)
+        self.y = int(y) 
+        self.x_low = int(x - (dx/2))
+        self.x_high = int(x + (dx/2))
+        self.y_low = int(y - (dy/2))
+        self.y_high = int(y + (dy/2))
 
 
 def section1_driving(cv_image):
@@ -21,8 +29,8 @@ def section1_driving(cv_image):
     plot_image = circled
 
     val = np.any( np.transpose(mask_edge)[s1_x][s1_y_low:s1_y_high])
-    print('vals' + str(np.transpose(mask_edge)[s1_x][s1_y_low:s1_y_high]))
-    print('maskval: ' + str(val))
+    #print('vals' + str(np.transpose(mask_edge)[s1_x][s1_y_low:s1_y_high]))
+    #print('maskval: ' + str(val))
     if val:
         print('s1: edge found!')
         flag = 1
@@ -123,45 +131,54 @@ def section3_driving(cv_image, last_error):
     
     return vel_lin, vel_ang, flag, plot_image, new_last_error
 
-def section4_driving(cv_image, gogogo_flag):
+def section4_driving(self, cv_image):
 
     vel_lin = 0
     vel_ang = 0
     flag = 0
 
-    mask_pants = cv2.inRange(cv_image, (50, 40, 25), (90, 70, 43))
-    total  = np.sum(mask_pants[400:700, 300:800])/255 
-    print(total)
-    if total < 50 or gogogo_flag:
-        gogogo_flag = True
-        vel_lin = 1
-
+    gray_im = np.dot(cv_image[...,:3], [0.299, 0.5487, 0.114])
+    mask_edge = cv2.inRange(gray_im, 240, 280)
+        
     mask_crosswalk = cv2.inRange(cv_image, (0, 0, 240), (15, 15, 255))
     
-    #check for pedestrian
-    s4_x = 600
-    s4_y = 540
-    s4_dy = 10
-    s4_dx = 200
-    s4_y_low = int(s4_y - (s4_dy/2))
-    s4_y_high = int(s4_y + (s4_dy/2))
-    s4_x_low = int(s4_x - (s4_dx/2))
-    s4_x_high = int(s4_x + (s4_dx/2))
-
-    #val = np.any( np.transpose(mask_edge)[s1_x][s1_y_low:s1_y_high])
-    val = np.any( mask_crosswalk[s4_y_low:s4_y_high, s4_x_low:s4_x_high])
-    #print(mask_crosswalk[s3_y_low:s3_y_high, s3_x_low:s3_x_high])
-    print("val" + str(val))
-    if val:
-        print('s4: edge found!')
-        print('ending')
-        flag = -3 #back to 1
-        vel_lin = 0
-        vel_ang = 0
-        gogogo_flag =  False
+    mask_pants = cv2.inRange(cv_image, (50, 40, 25), (90, 70, 43))
+    total  = np.sum(mask_pants[400:700, 490:790])/255 
+    print(total)
     
-    
+    if not self.seen_ped:
+        #if hasv't seen pedestrian
+        if total > 50:
+            print('seen and waiting')
+            self.seen_ped = True
+    else:
+        if total < 50 or self.gogogo:
+            print('GOGOGO')
 
+            self.gogogo= True
+            vel_lin = 1
+        
+        #go straight until the end of road
 
+            b_BL = myBox(600, 540, 200, 10)
+            b_RE = myBox(600, 575, 2, 125)
+            
+            blue_line_val  = np.any(mask_crosswalk[b_BL.y_low:b_BL.y_high, b_BL.x_low:b_BL.x_high])
+            road_edge_val = np.any(mask_edge[b_RE.y_low:b_RE.y_high, b_RE.x_low:b_RE.x_high])
+            print('bluelineval: ' + str(blue_line_val))
+            print('roadedge val: ' + str(road_edge_val))
+            if blue_line_val:
+                self.passed_second_blue_line = True
+                print('s4: blue line  found!')
 
-    return vel_lin, vel_ang, flag, gogogo_flag
+            if self.passed_second_blue_line:
+                if road_edge_val:
+                    print('s4: road edge found!')
+                    self.section = 2
+                    vel_ang = 0
+                    vel_lin = 0
+                    self.gogogo = False
+                    self.seen_ped = False
+                    self.passed_second_blue_line = False
+        
+    return vel_lin, vel_ang

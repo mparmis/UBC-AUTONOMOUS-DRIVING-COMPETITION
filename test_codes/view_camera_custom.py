@@ -37,12 +37,13 @@ class image_converter:
     mask_crosswalk = cv2.inRange(cv_image, (0, 0, 240), (15, 15, 255))
     
     mask_pants = cv2.inRange(cv_image, (50, 40, 25), (90, 70, 43))
-
-    plot_image =mask_pants # cv_image[400:700, 300:800] 
+    print(cv_image.shape)
+    #plot_image = cv_image[400:700, 490:790] 
+    plot_image = cv_image
 
     #print(mask_pants)
 
-    total_pants = np.sum(mask_pants[400:700, 300:800])/255 #if greater than 200 move
+    total_pants = np.sum(mask_pants[400:700, 490:790])/255 #if greater than 200 move
     print(total_pants)
 
     print(" ")

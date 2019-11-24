@@ -51,6 +51,8 @@ class image_converter:
     self.first_plate_publish_flag = 0
 
     self.gogogo = False
+    self.seen_ped = False
+    self.passed_second_blue_line = False
 
     self.sess = tf.Session()
     self.graph = tf.get_default_graph()
@@ -89,11 +91,10 @@ class image_converter:
   def callback(self, data):
     
     #init vals: too tired to make more elegant
-    team_ID = "Team14"
+    team_ID = "Team11"
     team_password = "h8rdc03d"
     plate_location = '1' #^from above
     plate_ID = 'YY66' #from above
-
 
     #timing
     start_time = time.time()
@@ -112,17 +113,14 @@ class image_converter:
     ## driving:
     if(self.section is 1):
         vel_lin, vel_ang, flag, _ = drv.section1_driving(cv_image)
-
     elif(self.section is 2):
         vel_lin, vel_ang, flag, _ = drv.section2_driving(cv_image)
-    
     elif(self.section is 3):
         vel_lin, vel_ang, flag, _, new_last_error = drv.section3_driving(cv_image, self.s3_last_error)
         self.s3_last_error = new_last_error
     elif(self.section is 4):
-        vel_lin, vel_ang, flag, gogogo_flag = drv.section4_driving(cv_image, self.gogogo)
-        self.gogogo = gogogo_flag
-        print("gogoflag: " + str(gogogo_flag))
+        vel_lin, vel_ang = drv.section4_driving(self, cv_image) 
+        print("gogoflag: " + str(self.gogogo))
     else:
         pass
 
