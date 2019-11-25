@@ -38,7 +38,7 @@ for j, img_path in enumerate(files):
     #add random shift
     data = img_to_array(load_img(raw_pics_path+img_path))
     samples = expand_dims(data, 0)
-    datagen = ImageDataGenerator(width_shift_range=[-10.0,10.0])
+    datagen = ImageDataGenerator(width_shift_range=[-7.0,7.0])
     it = datagen.flow(samples, batch_size=1)
     # generate samples and plot
     for i in range(1):
@@ -52,7 +52,7 @@ for j, img_path in enumerate(files):
         datagen = ImageDataGenerator(brightness_range=[0.2,1.3], preprocessing_function= blur,zoom_range=0.08,height_shift_range=[-5,5])
         it = datagen.flow(im_shifted, batch_size=1)
         # generate samples and plot
-        for i in range(5):
+        for i in range(20):
             # define subplot
             # pyplot.subplot(330 + 1 + i)
             # generate batch of images
@@ -62,7 +62,7 @@ for j, img_path in enumerate(files):
             it = datagen.flow(im_shifted_brightness, batch_size=1)
 
             # generate samples and plot
-            for i in range(1):
+            for i in range(2):
                 # define subplot
                 # pyplot.subplot(330 + 1 + i)
                 # generate batch of images
@@ -72,7 +72,7 @@ for j, img_path in enumerate(files):
                 it = datagen.flow(im_shifted_rotation, batch_size=1)
 
                 # generate samples and plot
-                for i in range(1):
+                for i in range(3):
                     # define subplot
                     # pyplot.subplot(330 + 1 + i)
                     # generate batch of images
@@ -104,10 +104,10 @@ for j, img_path in enumerate(files):
                             ims.append(cv2.resize(im_temp, final_size))
                         return ims
                         
-                    yi = [1320, 1320, 740]
-                    xi = [340, 445, 330]
-                    dy = [180, 180, 300]
-                    dx = [120, 120, 240]
+                    yi = [1320, 1320]
+                    xi = [340, 445]
+                    dy = [180, 180]
+                    dx = [120, 120]
                     final_size = (IM_WIDTH, IM_HEIGHT)
 
                     ims = split_ims(grayim_final, yi, xi, dy, dx, final_size)
@@ -116,7 +116,7 @@ for j, img_path in enumerate(files):
                         rand=random.uniform(0,1000)
                         if i <= 1: 
                             letter = img_path[i+2]
-                        else:
-                            letter = img_path[6]
+                        #else:
+                            #letter = img_path[6]
                         filename = letter + "_" + str(j) + "_%d.png" %(rand)
                         cv2.imwrite(save_pics_path + filename, ims[i])

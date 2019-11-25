@@ -106,7 +106,7 @@ reset_weights(conv_model)
 print("--beginning train--")
 history_conv = conv_model.fit(x, y, 
                               validation_split=0.15, 
-                              epochs=156, 
+                              epochs=200, 
                               batch_size=16)
 
 plt.plot(history_conv.history['loss'])

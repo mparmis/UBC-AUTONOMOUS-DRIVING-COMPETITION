@@ -17,7 +17,7 @@ save_dir = path + 'raw_pics/'
 with open(path + "plates.csv", 'w') as plates_file:
     csvwriter = csv.writer(plates_file)
 
-    for i in range(0, 500):
+    for i in range(0, 20):
 
         # Pick two random letters
         plate_alpha = ""

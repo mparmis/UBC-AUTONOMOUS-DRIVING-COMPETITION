@@ -12,7 +12,7 @@ import random
 from skimage.util import random_noise
 # load the image
 raw_pics_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/raw_pics/'
-save_pics_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/aug_letters/'
+save_pics_path = '/home/fizzer/Desktop/Enph353_JP/353_ws/src/Enph353-JP/Enph353-JP/cnn/aug_pos/'
 # augmented = []
 # augment_names = []
 
@@ -27,23 +27,21 @@ IM_HEIGHT = 60
 IM_WIDTH = 40
 
 def blur(img):
-    return (cv2.blur(img,(int(random.uniform(10,60)),int(random.uniform(10,60)))))
+    return (cv2.blur(img,(int(random.uniform(10,50)),int(random.uniform(10,50)))))
 
 for j, img_path in enumerate(files):
 
     #if j == MAX_NUM_IMAGES:
-    #if j == 10:
-        #break
     if j % 5 == 0:
         print('on image: ' + str(j))
 
     #add random shift
     data = img_to_array(load_img(raw_pics_path+img_path))
     samples = expand_dims(data, 0)
-    datagen = ImageDataGenerator(width_shift_range=[int(random.uniform(-20.0,-10.0)),int(random.uniform(10.0,20.0))])
+    datagen = ImageDataGenerator(width_shift_range=[-10.0,10.0])
     it = datagen.flow(samples, batch_size=1)
     # generate samples and plot
-    for i in range(5):
+    for i in range(1):
         # define subplot
         # pyplot.subplot(330 + 1 + i)
         # generate batch of images
@@ -51,10 +49,10 @@ for j, img_path in enumerate(files):
         
         #brightness change
 
-        datagen = ImageDataGenerator(brightness_range=[0.2,1.3], preprocessing_function= blur,zoom_range=0.08,height_shift_range=[int(random.uniform(-10.0,-5.0)),int(random.uniform(5.0,10.0))])
+        datagen = ImageDataGenerator(brightness_range=[0.2,1.3], preprocessing_function= blur,zoom_range=0.08,height_shift_range=[-5,5])
         it = datagen.flow(im_shifted, batch_size=1)
         # generate samples and plot
-        for i in range(10):
+        for i in range(5):
             # define subplot
             # pyplot.subplot(330 + 1 + i)
             # generate batch of images
@@ -64,7 +62,7 @@ for j, img_path in enumerate(files):
             it = datagen.flow(im_shifted_brightness, batch_size=1)
 
             # generate samples and plot
-            for i in range(int(random.uniform(2,3))):
+            for i in range(1):
                 # define subplot
                 # pyplot.subplot(330 + 1 + i)
                 # generate batch of images
@@ -74,7 +72,7 @@ for j, img_path in enumerate(files):
                 it = datagen.flow(im_shifted_rotation, batch_size=1)
 
                 # generate samples and plot
-                for i in range(int(random.uniform(1,2))):
+                for i in range(1):
                     # define subplot
                     # pyplot.subplot(330 + 1 + i)
                     # generate batch of images
@@ -106,19 +104,19 @@ for j, img_path in enumerate(files):
                             ims.append(cv2.resize(im_temp, final_size))
                         return ims
                         
-                    yi = [1320, 1320]
-                    xi = [40, 140]
-                    dy = [180, 180]
-                    dx = [ 120, 120]
+                    yi = [740]
+                    xi = [330]
+                    dy = [300]
+                    dx = [240]
                     final_size = (IM_WIDTH, IM_HEIGHT)
 
                     ims = split_ims(grayim_final, yi, xi, dy, dx, final_size)
 
-                    for i, im in enumerate(ims):
-                        rand=random.uniform(0,10000)
-                        if i <= 3: 
-                            letter = img_path[i]
-                        else:
-                            letter = img_path[6]
-                        filename = letter + "_" + str(j) + "_%d.png" %(rand)
-                        cv2.imwrite(save_pics_path + filename, ims[i])
+                    #for i, im in enumerate(ims):
+                    rand=random.uniform(0,1000)
+                        #if i <= 1: 
+                    letter = img_path[6]
+                        #else:
+                            #letter = img_path[6]
+                    filename = letter + "_" + str(j) + "_%d.png" %(rand)
+                    cv2.imwrite(save_pics_path + filename, ims[i])
