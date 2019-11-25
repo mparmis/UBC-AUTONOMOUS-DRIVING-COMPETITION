@@ -12,6 +12,19 @@ from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import Twist
 import matplotlib.pyplot as plt
 
+class myBox:
+    def __init__(self, x, y, dx, dy):
+        self.x = int(x)
+        self.y = int(y) 
+        self.x_low = int(x - (dx/2))
+        self.x_high = int(x + (dx/2))
+        self.y_low = int(y - (dy/2))
+        self.y_high = int(y + (dy/2))
+
+def check_box(mask_im, box):
+    return np.sum(mask_im[box.y_low:box.y_high, box.x_low:box.x_high])/255
+
+
 class image_converter:
 
   def __init__(self):
@@ -37,9 +50,21 @@ class image_converter:
     mask_crosswalk = cv2.inRange(cv_image, (0, 0, 240), (15, 15, 255))
     
     mask_pants = cv2.inRange(cv_image, (50, 40, 25), (90, 70, 43))
+    
+    mask_tail_lights = cv2.inRange(cv_image, (0, 0, 0), (50, 50, 50))
+    
+    mask_trees = cv2.inRange(cv_image, (42, 45, 47), (48, 54, 60))
+    
     print(cv_image.shape)
     #plot_image = cv_image[400:700, 490:790] 
-    plot_image = cv_image
+    plot_image = mask_edge
+
+
+    road1 = myBox(350, 400, 100, 200)
+    print('gray box count:' + str((200*50) - check_box(mask_trees, road1)))
+    # if (100*100) - check_box(mask_road, road1) < 100: 
+    #     print('road fully seen')
+
 
     #print(mask_pants)
 

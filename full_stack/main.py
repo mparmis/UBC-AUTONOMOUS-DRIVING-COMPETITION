@@ -46,13 +46,25 @@ class image_converter:
     self.plot = None
 
     #section int
-    self.section = 1
+    self.section = 3#1
 
     self.first_plate_publish_flag = 0
+
+    self.s3_cycles = 0
+    self.crosswalks_passed = 2#0
+    self.ICS_seen_intersection = False
+
+    self.turn_enough_to_inner = False
+
+    self.found_plate_flag = False
 
     self.gogogo = False
     self.seen_ped = False
     self.passed_second_blue_line = False
+
+    self.seen_sec6_truck  = False
+    self.sec6_gogogo = False
+
 
     self.sess = tf.Session()
     self.graph = tf.get_default_graph()
@@ -116,11 +128,15 @@ class image_converter:
     elif(self.section is 2):
         vel_lin, vel_ang, flag, _ = drv.section2_driving(cv_image)
     elif(self.section is 3):
-        vel_lin, vel_ang, flag, _, new_last_error = drv.section3_driving(cv_image, self.s3_last_error)
+        vel_lin, vel_ang, flag, _, new_last_error = drv.section3_driving(self, cv_image, self.s3_last_error)
         self.s3_last_error = new_last_error
     elif(self.section is 4):
         vel_lin, vel_ang = drv.section4_driving(self, cv_image) 
         print("gogoflag: " + str(self.gogogo))
+    elif(self.section is 5):
+        vel_lin, vel_ang = drv.section5(self, cv_image)
+    elif(self.section is 6):
+        vel_lin, vel_ang = drv.section6(self, cv_image)
     else:
         pass
 
@@ -137,6 +153,9 @@ class image_converter:
     all_high_conf_flag = False
     raw_plate = get_raw_plate(cv_image)
     if raw_plate is not None:
+        if self.crosswalks_passed >=2:
+          self.found_plate_flag=True
+        
         try:
           cv2.imwrite(self.save_im_path + str(self.save_i) + '.png', raw_plate)
           self.save_i = self.save_i + 1

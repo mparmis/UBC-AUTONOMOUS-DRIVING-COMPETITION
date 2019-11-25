@@ -10,6 +10,25 @@ class myBox:
         self.y_low = int(y - (dy/2))
         self.y_high = int(y + (dy/2))
 
+def check_box(mask_im, box):
+    return np.sum(mask_im[box.y_low:box.y_high, box.x_low:box.x_high])/255
+
+def get_box_crop(im, box):
+    return im[box.y_low:box.y_high, box.x_low:box.x_high]
+
+def centroid(im):
+    top = 0
+    bot = 0
+    index_array = np.linspace(0, im.shape[0]-1, im.shape[0] )
+    #print('indexarray: ' + str(index_array))
+    for r in range(0, im.shape[1]-2): #range of rows to check
+        top += np.sum(np.multiply(im[:, r], index_array))
+        bot += np.sum(im[:, r])
+    x_bar = top  / (bot +1)
+    print('xbar: '+ str(x_bar))
+    return x_bar
+    #print('xbar: ' + str(x_bar))
+
 
 def section1_driving(cv_image):
     gray_im = np.dot(cv_image[...,:3], [0.299, 0.5487, 0.114])
@@ -58,8 +77,8 @@ def section2_driving(cv_image):
     plot_image = circled
 
     val = np.any(mask_edge[s2_y][s2_x_low:s2_x_high])
-    print('vals' + str(mask_edge[s2_y][s2_x_low:s2_x_high]))
-    print('maskval: ' + str(val))
+    #print('vals' + str(mask_edge[s2_y][s2_x_low:s2_x_high]))
+    #print('maskval: ' + str(val))
     if val:
         print('s2: edge found!')
         flag = 1
@@ -68,11 +87,12 @@ def section2_driving(cv_image):
     return vel_lin, vel_ang, flag, plot_image
 
 
-def section3_driving(cv_image, last_error):
+def section3_driving(self, cv_image, last_error):
     gray_im = np.dot(cv_image[...,:3], [0.299, 0.5487, 0.114])
     mask_edge = cv2.inRange(gray_im, 240, 280)
     mask_crosswalk = cv2.inRange(cv_image, (0, 0, 240), (15, 15, 255))
-    
+    mask_road = cv2.inRange(gray_im, 78, 82.5)
+
     plot_image = mask_crosswalk
 
     vel_lin = 0
@@ -122,13 +142,34 @@ def section3_driving(cv_image, last_error):
     val = np.any( mask_crosswalk[s3_y_low:s3_y_high, s3_x_low:s3_x_high])
     #print(mask_crosswalk[s3_y_low:s3_y_high, s3_x_low:s3_x_high])
     print("val" + str(val))
-    if val:
+    if val and self.s3_cycles > 30:
+        self.s3_cycles = 0
         print('s3: edge found!')
         print('ending')
         flag = 1
         vel_lin = 0
         vel_ang = 0
+    else:
+        self.s3_cycles =  self.s3_cycles + 1
     
+    if(self.ICS_seen_intersection):
+        #wait for white line
+        print('witing for white line')
+        line2 = myBox(3, 500, 2, 50)
+        if check_box(mask_edge, line2):
+            print('found edge')
+            vel_lin = 0
+            vel_ang = 0
+            self.section = 5 #enter turning section
+
+    elif(self.crosswalks_passed >= 2 and self.found_plate_flag):
+        road1 = myBox(200, 600, 200, 100)
+        print('gray box count:' + str((200*100) - check_box(mask_road, road1)))
+        if (200*100) - check_box(mask_road, road1) < 5600: # was 5600 
+            print('road fully seen')
+            self.ICS_seen_intersection = True
+
+
     return vel_lin, vel_ang, flag, plot_image, new_last_error
 
 def section4_driving(self, cv_image):
@@ -170,15 +211,97 @@ def section4_driving(self, cv_image):
             if blue_line_val:
                 self.passed_second_blue_line = True
                 print('s4: blue line  found!')
+                self.section = 3
+                vel_ang = 0
+                vel_lin = 0
+                self.gogogo = False
+                self.seen_ped = False
+                self.passed_second_blue_line = False
+                self.crosswalks_passed = self.crosswalks_passed+1
 
-            if self.passed_second_blue_line:
-                if road_edge_val:
-                    print('s4: road edge found!')
-                    self.section = 2
-                    vel_ang = 0
-                    vel_lin = 0
-                    self.gogogo = False
-                    self.seen_ped = False
-                    self.passed_second_blue_line = False
+            # if self.passed_second_blue_line:
+            #     if road_edge_val:
+            #         print('s4: road edge found!')
+            #         self.section = 2
+            #         vel_ang = 0
+            #         vel_lin = 0
+            #         self.gogogo = False
+            #         self.seen_ped = False
+            #         self.passed_second_blue_line = False
         
+    return vel_lin, vel_ang
+
+def section5(self, cv_image):
+        
+    vel_lin = 0
+    vel_ang = 0
+
+    gray_im = np.dot(cv_image[...,:3], [0.299, 0.5487, 0.114])
+    mask_edge = cv2.inRange(gray_im, 240, 280)
+    mask_road = cv2.inRange(gray_im, 78, 82.5)
+    mask_trees = cv2.inRange(cv_image, (42, 45, 47), (48, 54, 60))
+
+    mask_tail_lights = cv2.inRange(cv_image, (0, 0, 0), (50, 50, 50))
+    
+    vel_ang = 1 #was -1
+    tree_box = myBox(250, 400, 150, 200)
+    cond1 = (200*150) - check_box(mask_trees, tree_box)
+    if not self.turn_enough_to_inner:
+        print('tree count: ' + str(cond1))
+
+    if cond1 < 17000 or self.turn_enough_to_inner:
+        print('turned anough')
+        self.turn_enough_to_inner = True
+        vel_ang = 0
+        vel_lin = 1
+
+        #look for line in front
+        inner_loop_line_box = myBox(600, 485, 10, 100) #was 450, and 550
+        cond2 = check_box(mask_edge, inner_loop_line_box)
+        car_box = myBox(600, 440, 10, 80)
+        cond3 = check_box(mask_tail_lights, car_box)
+        
+        print('innerlien count: ' +str(cond2))
+        print ('cond3' + str(cond3))
+        if cond2 > 2 or cond3 > 10 :
+            vel_lin = 0
+            vel_ang = 0
+            print('found line')
+            self.section =  6 #next section : wait for car
+    return vel_lin, vel_ang
+    
+
+def section6(self, cv_image):
+
+    vel_lin = 0
+    vel_ang = 0
+
+    gray_im = np.dot(cv_image[...,:3], [0.299, 0.5487, 0.114])
+    mask_edge = cv2.inRange(gray_im, 240, 280)
+    mask_road = cv2.inRange(gray_im, 78, 82.5)
+    mask_trees = cv2.inRange(cv_image, (42, 45, 47), (48, 54, 60))
+    
+    mask_tail_lights = cv2.inRange(cv_image, (0, 0, 0), (50, 50, 50))
+    
+    taillight_box = myBox(640, 540, 300, 180)
+    print('full frame: ' + str(np.sum(mask_tail_lights)))
+    print('check: ' + str(check_box(mask_tail_lights, taillight_box)))
+
+    if(check_box(mask_tail_lights, taillight_box)):
+        print('stared seeing truck')
+        self.seen_sec6_truck  = True
+
+    if (self.seen_sec6_truck and not check_box(mask_tail_lights, taillight_box)):
+        print('time to gogogo')
+        self.sec6_gogogo = True
+
+    if (self.sec6_gogogo):
+        vel_ang = 1
+        white_line_box = myBox(1000, 400, 40, 100)
+        if(check_box(mask_edge, white_line_box)):
+            print('found inner line sec 6')
+            vel_lin = 0
+            vel_ang = 0
+            self.section = 7
+
     return vel_lin, vel_ang
