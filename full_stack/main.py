@@ -46,12 +46,12 @@ class image_converter:
     self.plot = None
 
     #section int
-    self.section = 3#1
+    self.section = 1
 
     self.first_plate_publish_flag = 0
 
     self.s3_cycles = 0
-    self.crosswalks_passed = 2#0
+    self.crosswalks_passed = 0
     self.ICS_seen_intersection = False
 
     self.turn_enough_to_inner = False
@@ -64,7 +64,7 @@ class image_converter:
 
     self.seen_sec6_truck  = False
     self.sec6_gogogo = False
-
+    self.sec6_gogogo_straight = True
 
     self.sess = tf.Session()
     self.graph = tf.get_default_graph()
@@ -90,6 +90,15 @@ class image_converter:
     self.letter_loaded_model._make_predict_function()
     print('letters model_loaded from disk')
     
+    #position
+    pos_model_path = './cnn/model_saves_pos/model_test_5'#leav off .[extension]
+    json_file = open(pos_model_path + '.json', 'r')
+    pos_loaded_model_json = json_file.read()
+    json_file.close()
+    self.pos_loaded_model = model_from_json(pos_loaded_model_json)
+    self.pos_loaded_model.load_weights(pos_model_path+ ".h5")
+    self.pos_loaded_model._make_predict_function()
+    print('letters model_loaded from disk')
 
 
     self.save_i = 0
@@ -137,6 +146,8 @@ class image_converter:
         vel_lin, vel_ang = drv.section5(self, cv_image)
     elif(self.section is 6):
         vel_lin, vel_ang = drv.section6(self, cv_image)
+    elif(self.section is 7):
+        vel_lin, vel_ang = drv.section7(self, cv_image)
     else:
         pass
 
@@ -153,8 +164,6 @@ class image_converter:
     all_high_conf_flag = False
     raw_plate = get_raw_plate(cv_image)
     if raw_plate is not None:
-        if self.crosswalks_passed >=2:
-          self.found_plate_flag=True
         
         try:
           cv2.imwrite(self.save_im_path + str(self.save_i) + '.png', raw_plate)
@@ -177,6 +186,12 @@ class image_converter:
           set_session(self.sess)
           y_predict_letters = self.letter_loaded_model.predict(ims_processed)
 
+        #pos
+        with self.graph.as_default():
+          set_session(self.sess)
+          y_predict_pos = self.pos_loaded_model.predict(ims_processed)
+
+
         y_val = []
         y_index = []
         all_high_conf_flag = True
@@ -188,7 +203,11 @@ class image_converter:
             y_val.append(y_predict_letters[i][p_i])
             y_index.append(p_i)
             plate_string = plate_string + label_options[p_i]
-
+          elif i is 4:
+            p_i = np.argmax(y_predict_pos[i])
+            y_val.append(y_predict_pos[i][p_i])
+            y_index.append(p_i)
+            plate_string = plate_string + label_options[p_i]
           else: 
             p_i = np.argmax(y_predict_nums[i])
             y_val.append(y_predict_nums[i][p_i])
@@ -203,6 +222,8 @@ class image_converter:
         #plate_location = label_options[y_index[4]]  
         if all_high_conf_flag:
           print("FOUND GOOD PLATE")
+          if self.crosswalks_passed >=2:
+            self.found_plate_flag=True
 
         print("plate: " + str(plate_string))
         #print("pos: "+ str(plate_location))
@@ -213,7 +234,7 @@ class image_converter:
         self.plate_pub.publish(publish_string)
     elif(all_high_conf_flag):
         plate_location = plate_string[4]
-        plate_ID = plate_string[0:3]
+        plate_ID = plate_string[0:4]
         publish_string = team_ID + ',' + team_password + ',' + plate_location + ',' + plate_ID
         self.plate_pub.publish(publish_string)
         print('published plate and stall!: ' + str(publish_string))

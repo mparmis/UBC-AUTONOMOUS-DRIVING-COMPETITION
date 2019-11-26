@@ -101,7 +101,7 @@ def section3_driving(self, cv_image, last_error):
 
     #follow_outside line
     s3_kp = 0.01 #0.01
-    s3_kd = 0.01   #0.1
+    s3_kd = 0.00   #0.1 #ws 0.01
 
     submask_edge = np.transpose(np.transpose(mask_edge)[600:-1][:])
 
@@ -113,15 +113,15 @@ def section3_driving(self, cv_image, last_error):
         top += np.sum(np.multiply(submask_edge[r], index_array))
         bot += np.sum(submask_edge[r])
     x_bar = top  / (bot +1)
-    #print('xbar: ' + str(x_bar))
+    print('xbar: ' + str(x_bar))
 
     tar = 1100
     error = tar -  x_bar
-    #print('error: ' + str(error))
+    print('error: ' + str(error))
     ang_vel = s3_kp*(error) - s3_kd*(last_error- error)
     new_last_error = error
-
-    if(abs(error) > 55):      
+    
+    if(abs(error) > 45): # was 55       
         vel_ang = ang_vel
         vel_lin = 0.00
     else:
@@ -155,7 +155,7 @@ def section3_driving(self, cv_image, last_error):
     if(self.ICS_seen_intersection):
         #wait for white line
         print('witing for white line')
-        line2 = myBox(3, 500, 2, 50)
+        line2 = myBox(3, 500, 2, 30)#was 50
         if check_box(mask_edge, line2):
             print('found edge')
             vel_lin = 0
@@ -258,7 +258,7 @@ def section5(self, cv_image):
         #look for line in front
         inner_loop_line_box = myBox(600, 485, 10, 100) #was 450, and 550
         cond2 = check_box(mask_edge, inner_loop_line_box)
-        car_box = myBox(600, 440, 10, 80)
+        car_box = myBox(600, 540, 10, 80) # was 440
         cond3 = check_box(mask_tail_lights, car_box)
         
         print('innerlien count: ' +str(cond2))
@@ -296,12 +296,82 @@ def section6(self, cv_image):
         self.sec6_gogogo = True
 
     if (self.sec6_gogogo):
-        vel_ang = 1
-        white_line_box = myBox(1000, 400, 40, 100)
-        if(check_box(mask_edge, white_line_box)):
-            print('found inner line sec 6')
-            vel_lin = 0
-            vel_ang = 0
-            self.section = 7
+        if(self.sec6_gogogo_straight):
+            vel_lin = 1
+            inner_loop_line_box = myBox(600, 550, 10, 100) #was 450, and 550
+            cond2 = check_box(mask_edge, inner_loop_line_box)
+            print('cond2: ' + str(cond2))
+            if cond2 > 3:
+                print('found cond2 edge')
+                self.sec6_gogogo_straight = False
+        else:
+            vel_ang = 1
+            white_line_box = myBox(1000, 400, 20, 40)#was 50
+            print('white box check' + str(check_box(mask_edge, white_line_box)))
+            if(check_box(mask_edge, white_line_box)):
+                print('found inner line sec 6')
+                vel_lin = 0
+                vel_ang = 0
+                self.section = 7
 
     return vel_lin, vel_ang
+
+
+def section7(self, cv_image):
+
+    gray_im = np.dot(cv_image[...,:3], [0.299, 0.5487, 0.114])
+    mask_edge = cv2.inRange(gray_im, 240, 280)
+    mask_crosswalk = cv2.inRange(cv_image, (0, 0, 240), (15, 15, 255))
+    mask_road = cv2.inRange(gray_im, 78, 82.5)
+
+    plot_image = mask_crosswalk
+
+    vel_lin = 0
+    vel_ang = 0
+    flag = 0
+
+    #follow_outside line
+    s3_kp = 0.01 #0.01
+    s3_kd = 0.01   #0.1
+
+    submask_edge = np.transpose(np.transpose(mask_edge)[600:-1][:])
+
+    top = 0
+    bot = 0
+    index_array = np.linspace(600, 600+submask_edge.shape[1]-1, submask_edge.shape[1] )
+    #print('indexarray: ' + str(index_array))
+    for r in range(550, 719): #range of rows to check
+        top += np.sum(np.multiply(submask_edge[r], index_array))
+        bot += np.sum(submask_edge[r])
+    x_bar = top  / (bot +1)
+    print('xbar: ' + str(x_bar))
+
+    tar = 1100
+    error = tar -  x_bar
+    #print('error: ' + str(error))
+    ang_vel = s3_kp*(error)
+
+    if(abs(error) > 55):      
+        vel_ang = ang_vel
+        vel_lin = 0.00
+    else:
+        vel_lin = 0.0001
+        #vel.angular.z = 0.001
+
+    if x_bar < 2:
+        vel_lin =1
+        vel_ang = 0
+    #check for car:
+    mask_tail_lights = cv2.inRange(cv_image, (0, 0, 0), (50, 50, 50))
+    
+    taillight_box = myBox(640, 540, 300, 180)
+    print('check: ' + str(check_box(mask_tail_lights, taillight_box)))
+
+    if(check_box(mask_tail_lights, taillight_box)):
+        print('stared seeing truck')
+        vel_lin = 0
+        vel_ang = 0
+
+    return vel_lin, vel_ang
+
+
