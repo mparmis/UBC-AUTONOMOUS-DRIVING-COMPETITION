@@ -51,7 +51,7 @@ class image_converter:
     self.plot = None
 
     #section int
-    self.section = 7#1
+    self.section = 3#1
 
     self.first_plate_publish_flag = 0
 

@@ -412,7 +412,7 @@ def section7(self, cv_image):
     # self.s7_last_xbar = x_bar
    
             # calculate moments of binary image
-    M = cv2.moments(mask_edge[450:-1, 800:-1])
+    M = cv2.moments(mask_edge[350:690, 750:1210])
     
     # calculate x,y coordinate of center
     x_bar = 800 + int(M["m10"] / M["m00"])
@@ -421,7 +421,7 @@ def section7(self, cv_image):
     print('xbar: ' + str(x_bar))
 
 
-    tar = 1150 # was 1050 for old
+    tar = 1050 # was 1050 for old
     error = tar -  x_bar
     err_thres = 55
     
