@@ -115,7 +115,7 @@ def section3_driving(self, cv_image, last_error):
     x_bar = top  / (bot +1)
     print('xbar: ' + str(x_bar))
 
-    tar = 1100
+    tar = 1040 # 1100
     error = tar -  x_bar
     print('error: ' + str(error))
     ang_vel = s3_kp*(error) - s3_kd*(last_error- error)
@@ -392,7 +392,7 @@ def section7(self, cv_image):
     x_bar = top  / (bot +1)
     print('xbar: ' + str(x_bar))
     
-    tar = 1100
+    tar = 1050
     error = tar -  x_bar
     err_thres = 55
     
@@ -403,24 +403,26 @@ def section7(self, cv_image):
 
     
     #if(x_bar < 2 ):
-    if( yeet_check > 1000):
+    # if( yeet_check > 1000 or x_bar < 2):
+    #     vel_ang = 0
+    #     vel_lin = 0
         #submask_edge = mask_road[:, 200:1000]
-        submask_edge = mask_car[:, 600:-1]
-        top = 0
-        bot = 0
-        #index_array = np.linspace(200, 1000, submask_edge.shape[1] )
-        index_array = np.linspace(600, 600+submask_edge.shape[1]-1, submask_edge.shape[1] )
+        # submask_edge = mask_car[:, 600:-1]
+        # top = 0
+        # bot = 0
+        # #index_array = np.linspace(200, 1000, submask_edge.shape[1] )
+        # index_array = np.linspace(600, 600+submask_edge.shape[1]-1, submask_edge.shape[1] )
     
-        #print('indexarray: ' + str(index_array))
-        for r in range(350, 719): #range of rows to check
-            top += np.sum(np.multiply(submask_edge[r], index_array))
-            bot += np.sum(submask_edge[r])
-        x_bar = top  / (bot +1)
-        tar = 580
-        error = tar -  x_bar
-        print('xbar new : ' + str(x_bar))
-        print('error new: ' +str(error))
-        err_thres = 50
+        # #print('indexarray: ' + str(index_array))
+        # for r in range(350, 719): #range of rows to check
+        #     top += np.sum(np.multiply(submask_edge[r], index_array))
+        #     bot += np.sum(submask_edge[r])
+        # x_bar = top  / (bot +1)
+        # tar = 580
+        # error = tar -  x_bar
+        # print('xbar new : ' + str(x_bar))
+        # print('error new: ' +str(error))
+        # err_thres = 50
     
     #print('error: ' + str(error))
     ang_vel = s3_kp*(error)
@@ -432,10 +434,21 @@ def section7(self, cv_image):
         vel_lin = 0.0001
         #vel.angular.z = 0.001
 
+    # if (yeet_check < 1000 and x_bar < 2):
+    #     print("edge case error")
+    #     vel_lin = 0
+        vel_ang= -1
     # if x_bar < 2:
     #     vel_lin =1
     #     vel_ang = 0
     #check for car:
+
+    if( yeet_check > 1000 or x_bar < 2):
+        vel_ang = 0
+        vel_lin = 1
+
+
+    ##working tail light detection
     mask_tail_lights = cv2.inRange(cv_image, (0, 0, 0), (50, 50, 50))
     
     taillight_box = myBox(640, 540, 300, 180)
@@ -481,7 +494,7 @@ def new_section_5_internal_line_following(self, cv_image):
     x_bar = top  / (bot +1)
     print('xbar: ' + str(x_bar))
 
-    tar = 200 # new val
+    tar = 170 # new val # was 200
     error = tar -  x_bar
     #print('error: ' + str(error))
     ang_vel = s3_kp*(error)
@@ -502,7 +515,7 @@ def new_section_5_internal_line_following(self, cv_image):
     #check for car:
     mask_tail_lights = cv2.inRange(cv_image, (0, 0, 0), (50, 50, 50))
     
-    taillight_box = myBox(640, 540, 300, 180)
+    taillight_box = myBox(640, 600, 300, 180) # was 540 was y height
     print('taillight: ' + str(check_box(mask_tail_lights, taillight_box)))
 
     if(check_box(mask_tail_lights, taillight_box)>4):
