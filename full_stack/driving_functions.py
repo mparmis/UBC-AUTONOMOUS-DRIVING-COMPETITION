@@ -413,7 +413,9 @@ def section7(self, cv_image):
    
             # calculate moments of binary image
     M = cv2.moments(mask_edge[350:650, 750:1210]) #[350:690, 750:1210])
+    M = cv2.moments(mask_road[350:650, 320:1210]) #[350:690, 750:1210]) # was 300, not 320
     
+
     # M2 =  cv2.moments(mask_car[400:-1, 700:1210])
 
     # # calculate x,y coordinate of center
@@ -427,17 +429,17 @@ def section7(self, cv_image):
 
     # calculate x,y coordinate of center
     try:
-        x_bar = 800 + int(M["m10"] / M["m00"]) # was 800
+        x_bar = 300 + int(M["m10"] / M["m00"]) # was 800
     except:
         x_bar = 1400
-        print("Error0 div")
+        print("ERROR0 div")
     # cY = 600+ int(M["m01"] / M["m00"])
 
     # print('xbar2 ' + str(x_bar_2))
     print('xbar: ' + str(x_bar))
 
 
-    tar = 1050 # was 1050 for old
+    tar = 670 # was 1050 for old # was 650
 
     #choose higher xbar:
     # if x_bar_2 < x_bar: 
