@@ -37,6 +37,7 @@ class image_converter:
     self.plate_pub = rospy.Publisher('/license_plate', String, queue_size=10)
 
     self.s3_last_error = 0
+    self.s7_last_error = 0
     
     #timing
     self.last_time = 0
@@ -46,14 +47,13 @@ class image_converter:
     self.plot = None
 
     #section int
-    self.section = 1
+    self.section = 3#1
 
     self.first_plate_publish_flag = 0
 
     self.s3_cycles = 0
-    self.crosswalks_passed = 0
+    self.crosswalks_passed = 2
     self.ICS_seen_intersection = False
-
     self.turn_enough_to_inner = False
 
     self.found_plate_flag = False
@@ -65,6 +65,13 @@ class image_converter:
     self.seen_sec6_truck  = False
     self.sec6_gogogo = False
     self.sec6_gogogo_straight = True
+
+
+    self.sec3n_seen_car_flag =  False
+    self.sec3n_seeing_car_flag = False
+
+    self.dict_plate_vals = {}
+
 
     self.sess = tf.Session()
     self.graph = tf.get_default_graph()
@@ -143,9 +150,11 @@ class image_converter:
         vel_lin, vel_ang = drv.section4_driving(self, cv_image) 
         print("gogoflag: " + str(self.gogogo))
     elif(self.section is 5):
-        vel_lin, vel_ang = drv.section5(self, cv_image)
+        #vel_lin, vel_ang = drv.section5(self, cv_image)
+        vel_lin, vel_ang = drv.new_section_5_internal_line_following(self, cv_image)
     elif(self.section is 6):
-        vel_lin, vel_ang = drv.section6(self, cv_image)
+        pass
+        #vel_lin, vel_ang = drv.section6(self, cv_image)
     elif(self.section is 7):
         vel_lin, vel_ang = drv.section7(self, cv_image)
     else:
@@ -165,11 +174,11 @@ class image_converter:
     raw_plate = get_raw_plate(cv_image)
     if raw_plate is not None:
         
-        try:
-          cv2.imwrite(self.save_im_path + str(self.save_i) + '.png', raw_plate)
-          self.save_i = self.save_i + 1
-        except:
-          print("failed to save plate")
+        # try:
+        #   cv2.imwrite(self.save_im_path + str(self.save_i) + '.png', raw_plate)
+        #   self.save_i = self.save_i + 1
+        # except:
+        #   print("failed to save plate")
         print("found plate!")
         #pass 
         #do processing here
@@ -214,30 +223,48 @@ class image_converter:
             y_index.append(p_i)
             plate_string = plate_string + label_options[p_i]
 
+        lowest_conf = 1
         for val in y_val:
-          if (val < 0.99):
+          if val < lowest_conf:
+            lowest_conf = val
+          if (val < 0.85): # was 99 then 95
             all_high_conf_flag = False       
         
         #plate_ID = label_options[y_index[0]] + label_options[y_index[1]] + label_options[y_index[2]] + label_options[y_index[3]]
         #plate_location = label_options[y_index[4]]  
         if all_high_conf_flag:
-          print("FOUND GOOD PLATE")
-          if self.crosswalks_passed >=2:
+          #print("FOUND GOOD PLATE")
+          if self.crosswalks_passed >=2 and plate_string[4] is not 1:
             self.found_plate_flag=True
-
-        print("plate: " + str(plate_string))
+        #print("plate: " + str(plate_string))
         #print("pos: "+ str(plate_location))
-        print("yvals: " + str(y_val))
+        #print("yvals: " + str(y_val))
     if(self.first_plate_publish_flag == 0 ):
-        publish_string = team_ID + ',' + team_password + ',' + '0' + ',' + 'XX99'
+        publish_string = team_ID + ',' + team_password + ',' + '0' + ',' + 'ZZ99'
         self.first_plate_publish_flag = 1
         self.plate_pub.publish(publish_string)
-    elif(all_high_conf_flag):
+    #elif(all_high_conf_flag):
+    elif(raw_plate is not None):
         plate_location = plate_string[4]
         plate_ID = plate_string[0:4]
         publish_string = team_ID + ',' + team_password + ',' + plate_location + ',' + plate_ID
-        self.plate_pub.publish(publish_string)
-        print('published plate and stall!: ' + str(publish_string))
+        if (y_val[4] > 0.965): #plate location confidence check
+          if plate_location not in self.dict_plate_vals:
+            self.dict_plate_vals[plate_location] = lowest_conf
+            self.plate_pub.publish(publish_string)
+            print("PUBLISHED")
+            print('first: published plate and stall!: ' + str(publish_string))
+            print("yvals: " + str(y_val))
+          else:
+            curr_conf = self.dict_plate_vals[plate_location]
+            if curr_conf < lowest_conf:
+              self.dict_plate_vals[plate_location] = lowest_conf
+              self.plate_pub.publish(publish_string)
+              print("PUBLISHED")
+              print('second: published plate and stall!: ' + str(publish_string))
+              print("yvals: " + str(y_val))
+        # self.plate_pub.publish(publish_string)
+        # print('published plate and stall!: ' + str(publish_string))
     print('  ')
     
 

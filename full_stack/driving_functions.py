@@ -152,22 +152,60 @@ def section3_driving(self, cv_image, last_error):
     else:
         self.s3_cycles =  self.s3_cycles + 1
     
-    if(self.ICS_seen_intersection):
-        #wait for white line
-        print('witing for white line')
-        line2 = myBox(3, 500, 2, 30)#was 50
-        if check_box(mask_edge, line2):
-            print('found edge')
-            vel_lin = 0
-            vel_ang = 0
-            self.section = 5 #enter turning section
 
-    elif(self.crosswalks_passed >= 2 and self.found_plate_flag):
-        road1 = myBox(200, 600, 200, 100)
-        print('gray box count:' + str((200*100) - check_box(mask_road, road1)))
-        if (200*100) - check_box(mask_road, road1) < 5600: # was 5600 
-            print('road fully seen')
-            self.ICS_seen_intersection = True
+    if (self.crosswalks_passed >= 2 and self.found_plate_flag):
+        mask_car = cv2.inRange(cv_image, (119, 17, 17), (125, 23, 23))
+        box_car = myBox(100, 700, 200, 100)
+        cond_car = check_box(mask_car, box_car)
+        print('cond_car: ' + str(cond_car))
+        if(cond_car > 4000):
+            self.sec3n_seen_car_flag = True
+            self.sec3n_seeing_car_flag = True
+        if (cond_car < 2):
+            self.sec3n_seeing_car_flag = False
+    
+    if self.sec3n_seen_car_flag and not self.sec3n_seeing_car_flag:
+        #check for green
+        mask_green = cv2.inRange(cv_image, (66, 138, 25), (70, 142, 29))
+        green_box = myBox(50, 640, 100, 100)
+        cond_green = check_box(mask_green, green_box)
+        print('condgreen: ' + str(cond_green))
+        if cond_green > 2000:
+            print('foudn green')
+            #move to internal line following
+            self.section = 5
+            self.found_plate_flag = False
+
+
+    # if (self.crosswalks_passed >= 2 and self.found_plate_flag):
+    #     #wait for white line
+    #     print('witing for white line')
+    #     line2 = myBox(3, 500, 2, 30)#was 50
+    #     cond5 =check_box(mask_edge, line2)
+    #     if cond5 > 2:
+    #         print('found edge')
+    #         vel_lin = 0
+    #         vel_ang = 0
+    #         self.section = 5 #enter turning section
+    #         self.found_plate_flag = False
+
+
+    # if(self.ICS_seen_intersection):
+    #     #wait for white line
+    #     print('witing for white line')
+    #     line2 = myBox(3, 500, 2, 30)#was 50
+    #     if check_box(mask_edge, line2):
+    #         print('found edge')
+    #         vel_lin = 0
+    #         vel_ang = 0
+    #         self.section = 5 #enter turning section
+
+    # elif(self.crosswalks_passed >= 2 and self.found_plate_flag):
+    #     road1 = myBox(200, 600, 200, 100)
+    #     print('gray box count:' + str((200*100) - check_box(mask_road, road1)))
+    #     if (200*100) - check_box(mask_road, road1) < 5600: # was 5600 
+    #         print('road fully seen')
+    #         self.ICS_seen_intersection = True
 
 
     return vel_lin, vel_ang, flag, plot_image, new_last_error
@@ -324,6 +362,12 @@ def section7(self, cv_image):
     mask_crosswalk = cv2.inRange(cv_image, (0, 0, 240), (15, 15, 255))
     mask_road = cv2.inRange(gray_im, 78, 82.5)
 
+    # mask_car = cv2.inRange(cv_image, (119, 17, 17), (125, 23, 23))
+    mask_car = cv2.inRange(cv_image, (98, 0, 0), (126, 23, 23))
+    mask_car_2 = cv2.inRange(cv_image, (198, 96, 96), (202, 102, 102))
+
+    mask_car = cv2.add(mask_car, mask_car_2)
+
     plot_image = mask_crosswalk
 
     vel_lin = 0
@@ -335,7 +379,9 @@ def section7(self, cv_image):
     s3_kd = 0.01   #0.1
 
     submask_edge = np.transpose(np.transpose(mask_edge)[600:-1][:])
+    #submask_edge_2 = np.transpose(np.transpose(mask_car)[600:-1][:])
 
+    #submask_edge = cv2.add(submask_edge, submask_edge_2)
     top = 0
     bot = 0
     index_array = np.linspace(600, 600+submask_edge.shape[1]-1, submask_edge.shape[1] )
@@ -345,22 +391,50 @@ def section7(self, cv_image):
         bot += np.sum(submask_edge[r])
     x_bar = top  / (bot +1)
     print('xbar: ' + str(x_bar))
-
+    
     tar = 1100
     error = tar -  x_bar
+    err_thres = 55
+    
+    
+    car_box_checking = myBox(1050, 600, 100, 200)
+    yeet_check = check_box(mask_car, car_box_checking)
+    print('yeetcheck: ' +str(yeet_check))
+
+    
+    #if(x_bar < 2 ):
+    if( yeet_check > 1000):
+        #submask_edge = mask_road[:, 200:1000]
+        submask_edge = mask_car[:, 600:-1]
+        top = 0
+        bot = 0
+        #index_array = np.linspace(200, 1000, submask_edge.shape[1] )
+        index_array = np.linspace(600, 600+submask_edge.shape[1]-1, submask_edge.shape[1] )
+    
+        #print('indexarray: ' + str(index_array))
+        for r in range(350, 719): #range of rows to check
+            top += np.sum(np.multiply(submask_edge[r], index_array))
+            bot += np.sum(submask_edge[r])
+        x_bar = top  / (bot +1)
+        tar = 580
+        error = tar -  x_bar
+        print('xbar new : ' + str(x_bar))
+        print('error new: ' +str(error))
+        err_thres = 50
+    
     #print('error: ' + str(error))
     ang_vel = s3_kp*(error)
 
-    if(abs(error) > 55):      
+    if(abs(error) > err_thres):      
         vel_ang = ang_vel
         vel_lin = 0.00
     else:
         vel_lin = 0.0001
         #vel.angular.z = 0.001
 
-    if x_bar < 2:
-        vel_lin =1
-        vel_ang = 0
+    # if x_bar < 2:
+    #     vel_lin =1
+    #     vel_ang = 0
     #check for car:
     mask_tail_lights = cv2.inRange(cv_image, (0, 0, 0), (50, 50, 50))
     
@@ -375,3 +449,69 @@ def section7(self, cv_image):
     return vel_lin, vel_ang
 
 
+def new_section_5_internal_line_following(self, cv_image):
+
+    vel_lin = 0
+    vel_ang = 0
+    
+    #line follow internal:
+
+    gray_im = np.dot(cv_image[...,:3], [0.299, 0.5487, 0.114])
+    mask_edge = cv2.inRange(gray_im, 240, 280)
+    #mask_crosswalk = cv2.inRange(cv_image, (0, 0, 240), (15, 15, 255))
+    #mask_road = cv2.inRange(gray_im, 78, 82.5)
+
+    vel_lin = 0
+    vel_ang = 0
+    flag = 0
+
+    #follow_outside line
+    s3_kp = 0.01 #0.01
+    s3_kd = 0.01   #0.1
+
+    submask_edge = np.transpose(np.transpose(mask_edge)[0:680][:])
+
+    top = 0
+    bot = 0
+    index_array = np.linspace(0, 680, submask_edge.shape[1] )
+    #print('indexarray: ' + str(index_array))
+    for r in range(550, 719): #range of rows to check
+        top += np.sum(np.multiply(submask_edge[r], index_array))
+        bot += np.sum(submask_edge[r])
+    x_bar = top  / (bot +1)
+    print('xbar: ' + str(x_bar))
+
+    tar = 200 # new val
+    error = tar -  x_bar
+    #print('error: ' + str(error))
+    ang_vel = s3_kp*(error)
+
+    if(abs(error) > 52): #55 was # 70 didtn work     
+        vel_ang = 1*ang_vel
+        vel_lin = 0.00
+    else:
+        vel_lin = 0.0001
+        #vel.angular.z = 0.001
+
+    #yeet at car
+    # if x_bar < 2:
+    #     vel_lin =1
+    #     vel_ang = 0
+
+
+    #check for car:
+    mask_tail_lights = cv2.inRange(cv_image, (0, 0, 0), (50, 50, 50))
+    
+    taillight_box = myBox(640, 540, 300, 180)
+    print('taillight: ' + str(check_box(mask_tail_lights, taillight_box)))
+
+    if(check_box(mask_tail_lights, taillight_box)>4):
+        print('stared seeing truck')
+        vel_lin = 0
+        vel_ang = 0
+
+    if self.found_plate_flag is True:
+        #switch to 7 section
+        self.section = 7
+
+    return vel_lin, vel_ang

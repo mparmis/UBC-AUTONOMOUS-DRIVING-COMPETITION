@@ -55,9 +55,15 @@ class image_converter:
     
     mask_trees = cv2.inRange(cv_image, (42, 45, 47), (48, 54, 60))
     
+    # mask_car = cv2.inRange(cv_image, (119, 17, 17), (125, 23, 23))
+    mask_car = cv2.inRange(cv_image, (98, 0, 0), (126, 23, 23))
+    mask_car_2 = cv2.inRange(cv_image, (198, 96, 96), (202, 102, 102))
+
+    mask_car = cv2.add(mask_car, mask_car_2)
+
     print(cv_image.shape)
     #plot_image = cv_image[400:700, 490:790] 
-    plot_image = mask_edge
+    plot_image = cv_image
 
 
     road1 = myBox(350, 400, 100, 200)
