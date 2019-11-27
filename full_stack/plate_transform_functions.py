@@ -115,9 +115,9 @@ def get_raw_plate(cv_image):
 
     for cnt in contours: 
         area = cv2.contourArea(cnt)
-        if area > 700: # was 500 
+        if area > 1300: # was 1000 #was 700 # was 500 
             alength = cv2.arcLength(cnt, True)
-            approx = cv2.approxPolyDP(cnt,  0.0095 * cv2.arcLength(cnt, True), True) #was 0.009
+            approx = cv2.approxPolyDP(cnt,  0.0080 * cv2.arcLength(cnt, True), True) #was 0.009 @was 0.0095
             if len(approx)==4:
                 all_areas.append((area, approx))
                 contour_show = cv2.drawContours(contour_show, [approx], 0, (0, 0, 255), 5) 
