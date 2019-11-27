@@ -51,12 +51,12 @@ class image_converter:
     self.plot = None
 
     #section int
-    self.section = 3#1
+    self.section = 3
 
     self.first_plate_publish_flag = 0
 
     self.s3_cycles = 0
-    self.crosswalks_passed = 2#0
+    self.crosswalks_passed = 2
     self.ICS_seen_intersection = False
     self.turn_enough_to_inner = False
 
@@ -244,7 +244,7 @@ class image_converter:
         #plate_location = label_options[y_index[4]]  
         if all_high_conf_flag:
           #print("FOUND GOOD PLATE")
-          if self.crosswalks_passed >=2 and plate_string[4] is not 1:
+          if self.crosswalks_passed >=2 and plate_string[4] is not '2':
             self.found_plate_flag=True
         #print("plate: " + str(plate_string))
         #print("pos: "+ str(plate_location))

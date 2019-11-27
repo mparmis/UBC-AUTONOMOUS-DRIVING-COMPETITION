@@ -232,16 +232,16 @@ def section4_driving(self, cv_image):
     mask_crosswalk = cv2.inRange(cv_image, (0, 0, 240), (15, 15, 255))
     
     mask_pants = cv2.inRange(cv_image, (50, 40, 25), (90, 70, 43))
-    total  = np.sum(mask_pants[400:700, 490:790])/255 
+    total  = np.sum(mask_pants[400:700, 490:750])/255 #was 790 for x
     print(total)
     
     if not self.seen_ped:
         #if hasv't seen pedestrian
-        if total > 50:
+        if total > 100: # was 50
             print('seen and waiting')
             self.seen_ped = True
     else:
-        if total < 50 or self.gogogo:
+        if total < 20 or self.gogogo: # was 50
             print('GOGOGO')
 
             self.gogogo= True
@@ -412,21 +412,43 @@ def section7(self, cv_image):
     # self.s7_last_xbar = x_bar
    
             # calculate moments of binary image
-    M = cv2.moments(mask_edge[350:690, 750:1210])
+    M = cv2.moments(mask_edge[350:650, 750:1210]) #[350:690, 750:1210])
     
+    # M2 =  cv2.moments(mask_car[400:-1, 700:1210])
+
+    # # calculate x,y coordinate of center
+    # try:
+    #     x_bar_2 = 700 + int(M2["m10"] / M2["m00"]) # was 800
+    # except:
+    #     x_bar_2 = 1400
+    #     print("Error0 div 2")
+    # # cY = 600+ int(M["m01"] / M["m00"])
+
+
     # calculate x,y coordinate of center
-    x_bar = 800 + int(M["m10"] / M["m00"])
+    try:
+        x_bar = 800 + int(M["m10"] / M["m00"]) # was 800
+    except:
+        x_bar = 1400
+        print("Error0 div")
     # cY = 600+ int(M["m01"] / M["m00"])
 
+    # print('xbar2 ' + str(x_bar_2))
     print('xbar: ' + str(x_bar))
 
 
     tar = 1050 # was 1050 for old
+
+    #choose higher xbar:
+    # if x_bar_2 < x_bar: 
+    #     x_bar_final = x_bar_2
+    # else
+
+
     error = tar -  x_bar
-    err_thres = 55
+    err_thres = 65 # was 55650
     
-    
-    car_box_checking = myBox(1050, 600, 100, 200)
+    car_box_checking = myBox(1100, 700, 100, 100) # was 600 for y, was 100 for dx
     yeet_check = check_box(mask_car, car_box_checking)
     print('yeetcheck: ' +str(yeet_check))
 
@@ -472,9 +494,9 @@ def section7(self, cv_image):
     #     vel_ang = 0
     #check for car:
 
-    if( yeet_check > 1000):
+    if( yeet_check > 1800):
         print("YOOT YOOT YOOT")
-        vel_ang = 0
+        # vel_ang = 0
         vel_lin = 1
 
 
