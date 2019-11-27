@@ -27,7 +27,7 @@ IM_HEIGHT = 60
 IM_WIDTH = 40
 
 def blur(img):
-    return (cv2.blur(img,(int(random.uniform(10,60)),int(random.uniform(10,60)))))
+    return (cv2.blur(img,(int(random.uniform(10,40)),int(random.uniform(10,40)))))
 
 for j, img_path in enumerate(files):
 
@@ -40,10 +40,10 @@ for j, img_path in enumerate(files):
     #add random shift
     data = img_to_array(load_img(raw_pics_path+img_path))
     samples = expand_dims(data, 0)
-    datagen = ImageDataGenerator(width_shift_range=[int(random.uniform(-20.0,-10.0)),int(random.uniform(10.0,20.0))])
+    datagen = ImageDataGenerator(width_shift_range=[int(random.uniform(-8.0,-5.0)),int(random.uniform(5.0,8.0))])
     it = datagen.flow(samples, batch_size=1)
     # generate samples and plot
-    for i in range(5):
+    for i in range(2):
         # define subplot
         # pyplot.subplot(330 + 1 + i)
         # generate batch of images
@@ -51,10 +51,10 @@ for j, img_path in enumerate(files):
         
         #brightness change
 
-        datagen = ImageDataGenerator(brightness_range=[0.2,1.3], preprocessing_function= blur,zoom_range=0.08,height_shift_range=[int(random.uniform(-10.0,-5.0)),int(random.uniform(5.0,10.0))])
+        datagen = ImageDataGenerator(brightness_range=[0.4,1.3], preprocessing_function= blur,zoom_range=0.08,height_shift_range=[int(random.uniform(-8.0,-5.0)),int(random.uniform(5.0,8.0))])
         it = datagen.flow(im_shifted, batch_size=1)
         # generate samples and plot
-        for i in range(10):
+        for i in range(2):
             # define subplot
             # pyplot.subplot(330 + 1 + i)
             # generate batch of images
@@ -64,13 +64,13 @@ for j, img_path in enumerate(files):
             it = datagen.flow(im_shifted_brightness, batch_size=1)
 
             # generate samples and plot
-            for i in range(int(random.uniform(2,3))):
+            for i in range(int(random.uniform(1,2))):
                 # define subplot
                 # pyplot.subplot(330 + 1 + i)
                 # generate batch of images
                 im_shifted_rotation = it.next()
            
-                datagen = ImageDataGenerator(shear_range=random.uniform(0.5, 5))
+                datagen = ImageDataGenerator(shear_range=random.uniform(0.5, 3))
                 it = datagen.flow(im_shifted_rotation, batch_size=1)
 
                 # generate samples and plot
@@ -92,10 +92,10 @@ for j, img_path in enumerate(files):
                     im_shifted_shear_resized = cv2.resize(down_sized, shift_up)
                     #cv2.imwrite(save_pics_path+img_path,im_shifted_shear_resized)
                             
-                    if j%12 == 0:
-                        grayim_final = cv2.cvtColor(data, cv2.COLOR_BGR2GRAY)
-                    else:
-                        grayim_final = cv2.cvtColor(im_shifted_shear_resized, cv2.COLOR_BGR2GRAY)
+                    #if j%10 == 0:
+                        #grayim_final = cv2.cvtColor(data, cv2.COLOR_BGR2GRAY)
+                    #else:
+                    grayim_final = cv2.cvtColor(im_shifted_shear_resized, cv2.COLOR_BGR2GRAY)
                     #cv2.imwrite(save_pics_path+img_path,grayim_final)
 
                     def split_ims(im, yi, xi, dy, dx, final_size):
