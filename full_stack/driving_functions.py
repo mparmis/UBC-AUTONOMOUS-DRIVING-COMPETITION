@@ -113,14 +113,24 @@ def section3_driving(self, cv_image, last_error):
         top += np.sum(np.multiply(submask_edge[r], index_array))
         bot += np.sum(submask_edge[r])
     x_bar = top  / (bot +1)
-    print('xbar: ' + str(x_bar))
+    
+    if x_bar < 1:
+        if self.s3_last_xbar < 640:
+            x_bar = 0
+        else:
+            x_bar = 1700
 
+    self.s3_last_xbar = x_bar
+    print('xbar: ' + str(x_bar))
     tar = 1040 # 1100
     error = tar -  x_bar
     print('error: ' + str(error))
     ang_vel = s3_kp*(error) - s3_kd*(last_error- error)
     new_last_error = error
     
+    
+
+
     if(abs(error) > 45): # was 55       
         vel_ang = ang_vel
         vel_lin = 0.00
@@ -158,7 +168,7 @@ def section3_driving(self, cv_image, last_error):
         box_car = myBox(100, 700, 200, 100)
         cond_car = check_box(mask_car, box_car)
         print('cond_car: ' + str(cond_car))
-        if(cond_car > 4000):
+        if(cond_car > 2800): #was 4000
             self.sec3n_seen_car_flag = True
             self.sec3n_seeing_car_flag = True
         if (cond_car < 2):
@@ -390,8 +400,20 @@ def section7(self, cv_image):
         top += np.sum(np.multiply(submask_edge[r], index_array))
         bot += np.sum(submask_edge[r])
     x_bar = top  / (bot +1)
+    
+    if x_bar < 1:
+        if self.s7_last_xbar < 640:
+            x_bar = 0
+        else:
+            x_bar = 1700
+
+    self.s7_last_xbar = x_bar
+   
     print('xbar: ' + str(x_bar))
     
+
+
+
     tar = 1050
     error = tar -  x_bar
     err_thres = 55

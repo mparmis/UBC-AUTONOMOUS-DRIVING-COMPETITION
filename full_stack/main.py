@@ -22,6 +22,8 @@ import driving_functions as drv
 from plate_transform_functions import get_raw_plate
 from cnn_utils import convert_pic
 
+
+
 import os
 
 from std_msgs.msg import String
@@ -30,29 +32,31 @@ label_options = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'
 class image_converter:
 
   def __init__(self):
-    self.vel_pub = rospy.Publisher("/R1/cmd_vel", Twist, queue_size=10)
+    self.vel_pub = rospy.Publisher("/R1/cmd_vel", Twist, queue_size=2)#was 10
     self.bridge = CvBridge()
     self.image_sub = rospy.Subscriber("/R1/pi_camera/image_raw",Image,self.callback)
     
     self.plate_pub = rospy.Publisher('/license_plate', String, queue_size=10)
 
+    self.s3_last_xbar = 0
     self.s3_last_error = 0
     self.s7_last_error = 0
-    
+    self.s7_last_xbar = 0
     #timing
     self.last_time = 0
+    self.last_time_ROSPI = 0
 
     #plot vars
     self.first_plot = True
     self.plot = None
 
     #section int
-    self.section = 3#1
+    self.section = 1
 
     self.first_plate_publish_flag = 0
 
     self.s3_cycles = 0
-    self.crosswalks_passed = 2
+    self.crosswalks_passed = 0
     self.ICS_seen_intersection = False
     self.turn_enough_to_inner = False
 
@@ -117,7 +121,7 @@ class image_converter:
     print('files cleared')
 
   def callback(self, data):
-    
+    x_1=rospy.get_time()
     #init vals: too tired to make more elegant
     team_ID = "Team11"
     team_password = "h8rdc03d"
@@ -126,8 +130,12 @@ class image_converter:
 
     #timing
     start_time = time.time()
-    #print('elapsed_time: ' + str(start_time - self.last_time))
+    print('elapsed_time:  PY' + str(start_time - self.last_time))
     self.last_time = start_time
+    start_time_ros = rospy.get_time()
+    print('elapsed_time:  ROS' + str(start_time - self.last_time))
+    self.last_time_ROSPI = start_time_ros
+
 
     try:
         cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
@@ -164,6 +172,8 @@ class image_converter:
     vel.angular.z = vel_ang
     vel.linear.x = vel_lin
 
+
+    print('velL: ' + str(vel_lin) + " velA: " + str(vel_ang))
     self.section = self.section + flag
 
     self.vel_pub.publish(vel)
@@ -265,6 +275,8 @@ class image_converter:
               print("yvals: " + str(y_val))
         # self.plate_pub.publish(publish_string)
         # print('published plate and stall!: ' + str(publish_string))
+    x_2=rospy.get_time()
+    print("TIME: " + str(x_2 - x_1)) 
     print('  ')
     
 
