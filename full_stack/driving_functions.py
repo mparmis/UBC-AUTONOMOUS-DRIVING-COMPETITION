@@ -569,7 +569,7 @@ def new_section_5_internal_line_following(self, cv_image):
     #check for car:
     mask_tail_lights = cv2.inRange(cv_image, (0, 0, 0), (50, 50, 50))
     
-    taillight_box = myBox(640, 600, 300, 180) # was 540 was y height
+    taillight_box = myBox(640, 600, 500, 180) # was 540 was y height # was 300 dx #800, too much
     print('taillight: ' + str(check_box(mask_tail_lights, taillight_box)))
 
     if(check_box(mask_tail_lights, taillight_box)>4):

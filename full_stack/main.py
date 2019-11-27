@@ -53,6 +53,7 @@ class image_converter:
     #section int
     self.section = 1
 
+    self.avoid_plate = '2'
     self.first_plate_publish_flag = 0
 
     self.s3_cycles = 0
@@ -244,7 +245,7 @@ class image_converter:
         #plate_location = label_options[y_index[4]]  
         if all_high_conf_flag:
           #print("FOUND GOOD PLATE")
-          if self.crosswalks_passed >=2 and plate_string[4] is not '2':
+          if self.crosswalks_passed >=2 and plate_string[4] is not self.avoid_plate:
             self.found_plate_flag=True
         #print("plate: " + str(plate_string))
         #print("pos: "+ str(plate_location))
@@ -258,7 +259,9 @@ class image_converter:
         plate_location = plate_string[4]
         plate_ID = plate_string[0:4]
         publish_string = team_ID + ',' + team_password + ',' + plate_location + ',' + plate_ID
-        if (y_val[4] > 0.965): #plate location confidence check
+        print("potential publish strinng: "+str(publish_string))
+        print('vals: ' + str(y_val))
+        if (y_val[4] > 0.94): #plate location confidence check #was 0.965
           if plate_location not in self.dict_plate_vals:
             self.dict_plate_vals[plate_location] = lowest_conf
             self.plate_pub.publish(publish_string)
