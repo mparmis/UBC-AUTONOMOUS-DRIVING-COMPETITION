@@ -61,6 +61,17 @@ class image_converter:
 
     mask_car = cv2.add(mask_car, mask_car_2)
 
+
+        # calculate moments of binary image
+    M = cv2.moments(mask_edge[:, 600:-1])
+    
+    # calculate x,y coordinate of center
+    cX = 600+ int(M["m10"] / M["m00"])
+    cY = 600+ int(M["m01"] / M["m00"])
+
+    print("CX: " +str(cX))
+    print("CY: " +str(cY))
+
     print(cv_image.shape)
     #plot_image = cv_image[400:700, 490:790] 
     plot_image = cv_image

@@ -51,12 +51,12 @@ class image_converter:
     self.plot = None
 
     #section int
-    self.section = 1
+    self.section = 7#1
 
     self.first_plate_publish_flag = 0
 
     self.s3_cycles = 0
-    self.crosswalks_passed = 0
+    self.crosswalks_passed = 2#0
     self.ICS_seen_intersection = False
     self.turn_enough_to_inner = False
 

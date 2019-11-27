@@ -390,31 +390,38 @@ def section7(self, cv_image):
 
     submask_edge = np.transpose(np.transpose(mask_edge)[600:-1][:])
     #submask_edge_2 = np.transpose(np.transpose(mask_car)[600:-1][:])
-
     #submask_edge = cv2.add(submask_edge, submask_edge_2)
-    top = 0
-    bot = 0
-    index_array = np.linspace(600, 600+submask_edge.shape[1]-1, submask_edge.shape[1] )
-    #print('indexarray: ' + str(index_array))
-    for r in range(550, 719): #range of rows to check
-        top += np.sum(np.multiply(submask_edge[r], index_array))
-        bot += np.sum(submask_edge[r])
-    x_bar = top  / (bot +1)
-    
-    if x_bar < 1:
-        if self.s7_last_xbar < 640:
-            x_bar = 0
-        else:
-            x_bar = 1700
 
-    self.s7_last_xbar = x_bar
+    ###OLD MOMENT
+    # #submask_edge = cv2.add(submask_edge, submask_edge_2)
+    # top = 0
+    # bot = 0
+    # index_array = np.linspace(600, 600+submask_edge.shape[1]-1, submask_edge.shape[1] )
+    # #print('indexarray: ' + str(index_array))
+    # for r in range(550, 719): #range of rows to check
+    #     top += np.sum(np.multiply(submask_edge[r], index_array))
+    #     bot += np.sum(submask_edge[r])
+    # x_bar = top  / (bot +1)
+    
+    # if x_bar < 1:
+    #     if self.s7_last_xbar < 640:
+    #         x_bar = 0
+    #     else:
+    #         x_bar = 1700
+
+    # self.s7_last_xbar = x_bar
    
-    print('xbar: ' + str(x_bar))
+            # calculate moments of binary image
+    M = cv2.moments(mask_edge[450:-1, 800:-1])
     
+    # calculate x,y coordinate of center
+    x_bar = 800 + int(M["m10"] / M["m00"])
+    # cY = 600+ int(M["m01"] / M["m00"])
+
+    print('xbar: ' + str(x_bar))
 
 
-
-    tar = 1050
+    tar = 1150 # was 1050 for old
     error = tar -  x_bar
     err_thres = 55
     
@@ -459,13 +466,14 @@ def section7(self, cv_image):
     # if (yeet_check < 1000 and x_bar < 2):
     #     print("edge case error")
     #     vel_lin = 0
-        vel_ang= -1
+        #vel_ang= -1
     # if x_bar < 2:
     #     vel_lin =1
     #     vel_ang = 0
     #check for car:
 
-    if( yeet_check > 1000 or x_bar < 2):
+    if( yeet_check > 1000):
+        print("YOOT YOOT YOOT")
         vel_ang = 0
         vel_lin = 1
 
