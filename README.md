@@ -1,4 +1,4 @@
-#ENPH 353 - Simulated Autonomous Driving Competition
+# ENPH 353 - Simulated Autonomous Driving Competition
 
 This project is the final result of the ENPH 353 course competition. ~20 pairs of students built code to move a robot in a simulated environment. The robots had to navigate a course, avoid moving obstacles, and collect information from 'parked cars' in the environment. 
 
