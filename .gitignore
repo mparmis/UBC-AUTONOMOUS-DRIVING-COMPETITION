@@ -9,3 +9,5 @@ full_stack/pics_ex1
 cnn/aug_pics_test/*.png
 cnn/aug_letters/*.png
 cnn/aug_nums/*.png
+.vscode
+*.pyc
